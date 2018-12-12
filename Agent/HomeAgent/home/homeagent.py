@@ -1274,8 +1274,12 @@ class HomeAgent(Agent):
             else:
                 print("{app} is not in this period's disposition. turning it off".format(app = app.name))
                 app.on = False
+        Cap = self.CapNumber()
+        tagClient.writeTags(["TOTAL_CAP_DEMAND"], Cap, "load")
+        print("capacitor number:")
+        print(Cap)        
+        #need to put into database also
         
-    
     def disconnectLoad(self):
         #we can disconnect load at will
         tagClient.writeTags([self.relayTag],[False],"load")
@@ -1297,16 +1301,16 @@ class HomeAgent(Agent):
         self.vip.pubsub.publish(peer = "pubsub",topic = "customerservice",headers = {}, message = mess)
         
     def measureVoltage(self):
-        print (self.voltageTag)
+        #print (self.voltageTag)
         return tagClient.readTags([self.voltageTag],"load")
         
     def measureCurrent(self):
-        print(self.currentTag)
+        #print(self.currentTag)
         return tagClient.readTags([self.currentTag],"load")
     
     def measurePower(self):
-        print(self.measureVoltage())
-        print(self.measureCurrent())
+        #print(self.measureVoltage())
+        #print(self.measureCurrent())
         return self.measureVoltage()*self.measureCurrent()
     
     def measurePF(self):
@@ -1324,6 +1328,21 @@ class HomeAgent(Agent):
                 if res.issink:
                     net -= res.getInputUnregPower()
         return net
+    
+    def CapNumber(self):
+        IndCurrent = readTags(["IND_MAIN_CURRENT"],"load")
+        IndVoltage = readTags(["IND_MAIN_COLTAGE"],"load")
+        IndPower = IndCurrent * IndVoltage
+        #c is the capacity reactance of each capacitance
+        c = 1 / (60 *2 * math.pi * 0.000018)
+        powerfactor = tagClient.readTags([self.powerfactorTag],"grid")
+        if powerfactor < 0.9:
+            Q = IndPower * powerfactor
+            Qgoal = IndPower * 0.9
+            Qneed = Q - Qgoal
+        Cap = 24*24/Qneed
+        CapNumber = int(round(Cap / c))
+        return CapNumber
     
     def dbnewappliance(self, newapp, dbconn, t0):
         command = 'INSERT INTO appliances VALUES("{time}",{et},"{name}","{type}","{owner}",{pow})'.format(time = datetime.utcnow().isoformat(), et = time.time()-t0, name = newapp.name, type = newapp.__class__.__name__, owner = newapp.owner, pow = newapp.nominalpower)

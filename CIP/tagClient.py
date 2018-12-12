@@ -9,25 +9,25 @@ even if only a single tag value pair is being written'''
 def writeTags(names,values,plc):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tserver_addr = ('localhost',12897)
-    print("tag client attempting to connect and write to {host}:{port}".format(host = tserver_addr[0], port = tserver_addr[1]))
+   # print("tag client attempting to connect and write to {host}:{port}".format(host = tserver_addr[0], port = tserver_addr[1]))
     
     try:
         sock.connect(tserver_addr)
-        print("sock.connect is running")
+    #    print("sock.connect is running")
         message = "write {plc}".format(plc = plc)
         for index,name in enumerate(names):
             message = message + " {name}:{value}".format(name = name, value = str(values[index]))
                 
         message = message + "\n"
-        print("already install message")
-        print(message)
+    #    print("already install message")
+    #    print(message)
         sock.sendall(message)
         
         data = sock.recv(1024)
         #print("\nWRITE @ {dt} \nMESSAGE: {mes}  REC: {dat}".format(dt = datetime.isoformat(datetime.now()), mes = message, dat = data))
         
         #flog = open("~/volttron/taglog","a+")
-        print("WRITE @ {dt} \nMESSAGE: {mes}REC: {dat}".format(dt = datetime.isoformat(datetime.now()), mes = message, dat = data))
+    #    print("WRITE @ {dt} \nMESSAGE: {mes}REC: {dat}".format(dt = datetime.isoformat(datetime.now()), mes = message, dat = data))
     except Exception as e:
         print("tag client experiencing problem")
         print (e)
@@ -42,11 +42,11 @@ def readTags(names, plc):
     outdict = {}
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tserver_addr = ('localhost',12897)
-    print("tag client attempting to connect to  and read from {host}:{port}".format(host = tserver_addr[0], port = tserver_addr[1]))
+  #  print("tag client attempting to connect to  and read from {host}:{port}".format(host = tserver_addr[0], port = tserver_addr[1]))
     
     try:
-        print("start try")
-        print(names)
+   #     print("start try")
+   #     print(names)
         sock.connect(tserver_addr)
    #     print("sock.connect is running")
         message = "read {plc}".format(plc = plc)
@@ -57,7 +57,7 @@ def readTags(names, plc):
         sock.sendall(message)
    #     print("already send message")
         data = sock.recv(1024)
-        print("data receive")
+   #     print("data receive")
         #print("\nREAD @ {dt} \nMESSAGE: {mes}  REC: {dat}".format(dt = datetime.isoformat(datetime.now()), mes = message, dat = data))
             
     except Exception as e:
