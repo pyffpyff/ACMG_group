@@ -1330,8 +1330,8 @@ class HomeAgent(Agent):
         return net
     
     def CapNumber(self):
-        IndCurrent = readTags(["IND_MAIN_CURRENT"],"load")
-        IndVoltage = readTags(["IND_MAIN_COLTAGE"],"load")
+        IndCurrent = tagClient.readTags(["IND_MAIN_CURRENT"],"load")
+        IndVoltage = tagClient.readTags(["IND_MAIN_VOLTAGE"],"load")
         IndPower = IndCurrent * IndVoltage
         #c is the capacity reactance of each capacitance
         c = 1 / (60 *2 * math.pi * 0.000018)
@@ -1339,9 +1339,9 @@ class HomeAgent(Agent):
         if powerfactor < 0.9:
             Q = IndPower * powerfactor
             Qgoal = IndPower * 0.9
-            Qneed = Q - Qgoal
+            Qneed = Qgoal - Q
         Cap = 24*24/Qneed
-        CapNumber = int(round(Cap / c))
+        CapNumber = double(int(round(Cap / c)))
         return CapNumber
     
     def dbnewappliance(self, newapp, dbconn, t0):
