@@ -848,7 +848,9 @@ class UtilityAgent(Agent):
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
             elif type(res) is resource.ACresource:
                 amount = res.maxDischargePower*.8
-                rate = control.ratecalc(res.capCost,.05,res.amortizationPeriod,.2) + 0.2#*totalsupply/amount
+                rate = 1.15*res.fuelCost
+                
+                #rate = control.ratecalc(res.capCost,.05,res.amortizationPeriod,.2) + 0.2*totalsupply/amount
                 #need test for the amount and rate value!!!
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "auxilliary_service": "reserve", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
             else:

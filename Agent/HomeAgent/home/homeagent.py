@@ -546,16 +546,12 @@ class HomeAgent(Agent):
                     print("RECEIVED RATE NOTIFICATION FROM {them} FOR PERIOD {per}. NEW RATE IS {rate}".format(them = messageSender, per = pnum, rate = rate))
 
 
-
-
-
-        def prepareBids(self,period):
+    def prepareBids(self,period):
         
         #submit bids based on plans
-            for plan in period.plans:
-                self.prepareBidFromPlan(plan)
-            
-        
+        for plan in period.plans:
+            self.prepareBidFromPlan(plan)
+                 
        
     def prepareBidFromPlan(self,plan):
         period = plan.period
@@ -1341,7 +1337,7 @@ class HomeAgent(Agent):
             Qgoal = IndPower * 0.9
             Qneed = Qgoal - Q
         Cap = 24*24/Qneed
-        CapNumber = double(int(round(Cap / c)))
+        CapNumber = float(int(round(Cap / c)))
         return CapNumber
     
     def dbnewappliance(self, newapp, dbconn, t0):
