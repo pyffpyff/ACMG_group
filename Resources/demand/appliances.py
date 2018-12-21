@@ -378,8 +378,10 @@ class NoDynamics(Device):
         
         self.on = False
         self.statebase = 1
-    
+        
+        
     def getState(self):
+        print("run getState in appliances for light")
         if self.on:
             return 1
         else:

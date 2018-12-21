@@ -163,7 +163,7 @@ class HomeAgent(Agent):
             for devname in bg:
                 g.append(self.DevDict[devname])
             self.BidGroups.append(g)
-            
+        print("BidGroups:")    
         print self.BidGroups
         
         #core.schedule event object for the function call to begin next period

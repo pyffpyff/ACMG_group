@@ -651,12 +651,8 @@ class UtilityAgent(Agent):
     def accountUpdate(self):
         #need more consideration
         print("UTILITY {me} ACCOUNTING ROUTINE".format(me = self.name))
-        print("grouplist: ")
-        print(self.groupList)
         for group in self.groupList:
             for cust in group.customers:
-                print("customers: ")
-                print(cust)
                 power = cust.measurePower()
                 
                 self.dbconsumption(cust,power,self.dbconn,self.t0)
@@ -849,7 +845,8 @@ class UtilityAgent(Agent):
             elif type(res) is resource.ACresource:
                 amount = res.maxDischargePower*.8
                 rate = 1.15*res.fuelCost
-                
+                print("ACresoucr rate:")
+                print(rate)
                 #rate = control.ratecalc(res.capCost,.05,res.amortizationPeriod,.2) + 0.2*totalsupply/amount
                 #need test for the amount and rate value!!!
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "auxilliary_service": "reserve", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
@@ -894,14 +891,27 @@ class UtilityAgent(Agent):
             rblen = len(self.reserveBidList)
             dblen = len(self.demandBidList)
             
+            print("sblen:")
+            print(sblen)
+            print("dblen:")
+            print(dblen)
+            
             while supplyindex < sblen and demandindex < dblen:
+                print("supplyindex:")
+                print(supplyindex)
+                print("demandindex:")
+                print(demandindex)
+                
                 supbid = self.supplyBidList[supplyindex]
                 dembid = self.demandBidList[demandindex]
+                
+                print("supplybid rate: {sup}".format(sup = supbid.rate))
+                print("demandbid rate: {dem}".format(dem = dembid.rate))
                 if settings.DEBUGGING_LEVEL >= 2:
                     print("\ndemand index: {di}".format(di = demandindex))
                     print("supply index: {si}".format(si = supplyindex))
                     
-                if dembid.rate > supbid.rate:
+                if dembid.rate >= supbid.rate:
                     if settings.DEBUGGING_LEVEL >= 2:
                         print("demand rate {dr} > supply rate {sr}".format(dr = dembid.rate, sr = supbid.rate))
                         
@@ -1601,7 +1611,7 @@ class UtilityAgent(Agent):
             print("{mat}".format(mat = self.connMatrix))
         
     def marketfeed(self, peer, sender, bus, topic, headers, message):
-        #print("TEMP DEBUG - UTILITY: {mes}".format(mes = message))
+        print("TEMP DEBUG - UTILITY: {mes}".format(mes = message))
         mesdict = json.loads(message)
         messageSubject = mesdict.get("message_subject",None)
         messageTarget = mesdict.get("message_target",None)
@@ -1612,6 +1622,8 @@ class UtilityAgent(Agent):
                 print("\nUTILITY {me} RECEIVED AN ENERGYMARKET MESSAGE: {type}".format(me = self.name, type = messageSubject))
             if messageSubject == "bid_response":
                 side = mesdict.get("side",None)
+                print("side: {sid}".format(sid = side))
+        
                 rate =  mesdict.get("rate",None)
                 amount = mesdict.get("amount",None)
                 period = mesdict.get("period_number",None)
