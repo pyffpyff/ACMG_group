@@ -381,7 +381,6 @@ class NoDynamics(Device):
         
         
     def getState(self):
-        print("run getState in appliances for light")
         if self.on:
             return 1
         else:
@@ -436,12 +435,10 @@ def makeResource(strlist,classlist,debug = False):
     def addOne(item,classlist):
         if type(item) is dict:
             resType = item.get("type",None)
-            if resType == "solar":
-                res = SolarPanel(**item)
-            elif resType == "lead_acid_battery":
+            if resType == "lead_acid_battery":
                 res = LeadAcidBattery(**item)
-            elif resType == "generator":
-                res = Generator(**item)
+            elif resType == "ACresource":
+                res = ACresource(**item)
             else:
                 pass
             classlist.append(res)

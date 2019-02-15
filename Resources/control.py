@@ -545,6 +545,7 @@ def dailyratecalc(capitalCost,discountRate,term):
 def ratecalc(capitalCost,discountRate,term,capacityFactor):
     dailyrate = dailyratecalc(capitalCost, discountRate, term)
     rate = dailyrate/capacityFactor
+    print("ratecalc")
     return rate
     
 def acceptbidasis(bid):

@@ -9,6 +9,7 @@ from volttron.platform.vip.agent import Core
 from ACMGAgent.Resources import control
 
 from datetime import datetime, timedelta
+from random import randint
 
 class Resource(object):
     def __init__(self,**res):
@@ -411,7 +412,8 @@ class ACresource(Source):
 #         return 0
     
     def inputCostFn(self,input,period,state,duration):
-        cost = control.ratecalc(self.capCost,.05,self.amortizationPeriod,.2) + self.getPowerFromPU(input)*duration*self.fuelCost
+        cost = control.ratecalc(self.capCost,.05,self.amortizationPeriod,.2) + self.getPowerFromPU(input)*duration*self.fuelCost + 0.01*randint(0,9)
+        print("inputCostFn")
         return cost
     
     def applySimulatedInput(self,state,input,duration):
