@@ -1,0 +1,87 @@
+{
+	"agentid": "home3",
+	"name": "home3",
+	"location": "AC.COM.BUS1.LOAD1",
+	"message": "home agent up",
+	"FREGpart" : 1,
+	"DRpart" : 1,
+	"refload" : 1.2,
+	"windowlength" : 8,
+	"resources": 
+    [
+        {
+            "type": "lead_acid_battery", 
+            "owner": "Crunderson", 
+            "name":"Dionysus", 
+            "location": "AC.RES.BUS1",
+            "capCost": 140, 
+            "maxDischargePower": 4, 
+            "maxChargePower": 4, 
+            "capacity": 1.2, 
+            "chargeChannel": 5, 
+            "dischargeChannel": 1, 
+            "costfn":"interpolate",
+            "cfnparams":{"states": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], 
+			"values":[4.0, 1.0, -0.1, -0.1, 1.0, 3.0]}
+        }
+    ],
+	"appliances": 
+    [
+        {
+            "type": "heater",
+            "owner":"Crunderson",
+            "name":"Mendeleev",
+            "specificheatcapacity":4.184,
+            "mass":4.4,
+            "thermalresistance":35.0,
+            "nominalpower":1.2,
+            "deltat":10,
+            "inittemp":33.0
+        }
+    ],
+    "preference_manager":
+    {
+        "selection_rule":
+        {
+            "type":"repeating_sets",
+            "params":{"periods":[[0,1,2,3,4,5,6,7,8,9,10],[11,12,13,14,15,16,17,18,19,20,21,22,23]]}
+        },
+        "behavior_sets":
+        [
+		[
+	            
+	            {
+	                "name":"Mendeleev",
+	                "devicenames":["Mendeleev"],
+	                "costfn":
+	                {
+	                    "type":"quad",
+	                    "params":
+	                    {
+	                        "a":1200.0,
+	                        "b":-9.0,
+	                        "c":0.7
+	                    }
+	                }
+	            }
+			],
+			[
+	            
+	            {
+	                "name":"Mendeleev",
+	                "devicenames":["Mendeleev"],
+	                "costfn":
+	                {
+	                    "type":"quad",
+	                    "params":
+	                    {
+	                        "a":1200.0,
+	                        "b":-14.0,
+	                        "c":0.8
+	                    }
+	                }
+	            }
+		]
+        ]
+    }
+}

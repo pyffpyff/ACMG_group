@@ -840,13 +840,13 @@ class UtilityAgent(Agent):
             print (type(res))
             if type(res) is resource.LeadAcidBattery:
                 amount = res.maxDischargePower
-                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.2*totalsupply/amount 
+                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.2*totalsupply/amount + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
             elif type(res) is resource.ACresource:
                 amount = res.maxDischargePower*.8
                 print("ACresouce rate:")
                 
-                rate = 1.5*res.fuelCost + 0.01*random.randint(0,9)
+                rate = 1.5*res.fuelCost + 0.02*random.randint(0,9)
                 print(rate)
                 #rate = control.ratecalc(res.capCost,.05,res.amortizationPeriod,.2) + 0.2*totalsupply/amount
                 #need test for the amount and rate value!!!

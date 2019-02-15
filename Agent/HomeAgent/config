@@ -1,5 +1,5 @@
 {"agentid": "home1",
-	"name": "Figueroa",
+	"name": "home1",
 	"location": "AC.RES.BUS1.LOAD2",
 	"message": "home agent up",
 	"FREGpart" : 0,

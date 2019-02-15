@@ -1,0 +1,53 @@
+{
+	"agentid": "home2",
+	"name": "home2",
+	"location": "AC.IND.BUS2.LOAD3",
+	"message": "home agent up",
+	"FREGpart" : 0,
+	"DRpart" : 1,
+	"refload" : 1.8,
+	"windowlength" : 7,
+	"resources": [],
+	"appliances": 
+	[
+		{
+			"type": "heater",
+			"owner":"utility2",
+			"name":"Pontryagin",
+			"specificheatcapacity":4.184,
+			"mass":2.0,
+			"thermalresistance":28.0,
+			"maxsetpoint":40.0,
+			"nominalpower":0.6,
+			"deltat":10.0,
+			"inittemp":41.0
+		}
+	],
+	"preference_manager":
+	{
+		"selection_rule":
+		{
+			"type":"fixed",
+			"params":{}
+		},
+		"behavior_sets":
+		[
+			[
+				{
+					"name":"Pontryagin",
+					"devicenames":["Pontryagin"],
+					"costfn":
+					{
+						"type":"quad",
+						"params":
+						{
+							"a":1250.0,
+							"b":-8.0,
+							"c":0.74
+						}
+					}
+				}
+			]
+		]
+	}
+}
