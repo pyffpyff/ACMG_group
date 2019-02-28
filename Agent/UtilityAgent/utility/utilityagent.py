@@ -574,7 +574,7 @@ class UtilityAgent(Agent):
                             for node in self.nodes:
                                 if node.name.split(".") == resource["location"].split("."):
                                     resType = resource.get("type",None)
-                                    if resType == "lead_acid_battery":
+                                    if resType == "LeadAcidBattery":
                                         newres = customer.LeadAcidBatteryProfile(**resource)
                                     elif resType == "ACresource":
                                         newres = customer.GeneratorProfile(**resource)
@@ -836,17 +836,16 @@ class UtilityAgent(Agent):
        
         for res in self.Resources:
             newbid = None
-            print ("type of resource:")
-            print (type(res))
+           
             if type(res) is resource.LeadAcidBattery:
                 amount = res.maxDischargePower
-                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.2*totalsupply/amount + 0.01*random.randint(0,9)
-                newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
+                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.03*amount + 0.01*random.randint(0,9)
+                newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "auxilliary_service": "reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
             elif type(res) is resource.ACresource:
                 amount = res.maxDischargePower*.8
                 print("ACresouce rate:")
                 
-                rate = 1.5*res.fuelCost + 0.02*random.randint(0,9)
+                rate = 1.2*res.fuelCost + 0.01*random.randint(0,9)
                 print(rate)
                 #rate = control.ratecalc(res.capCost,.05,res.amortizationPeriod,.2) + 0.2*totalsupply/amount
                 #need test for the amount and rate value!!!
@@ -1260,40 +1259,59 @@ class UtilityAgent(Agent):
                     
                     bid.printInfo(0)
                     res = listparse.lookUpByName(bid.resourceName,self.Resources)
+                    print("enact plan")
+                    print("type(res)==ACresource")
+                    print("res:")
+                    print(res)
                     if res is not None:
                         involvedResources.append(res)
                         #if the resource is already connected, change the setpoint
-                        
-                        if res.connected == True:
-                            if settings.DEBUGGING_LEVEL >= 2:
-                                print(" Resource {rname} is already connected".format(rname = res.name))
-                            if bid.service == "power":
-                                #res.DischargeChannel.ramp(bid.amount)
-                                #res.DischargeChannel.changeSetpoint(bid.amount)
-                                res.setDisposition(bid.amount, 0)
+                        if type(res) is resource.ACresource:
+                                                        
+                            if res.connected == True:
                                 if settings.DEBUGGING_LEVEL >= 2:
-                                    print("Power resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
-                            elif bid.service == "reserve":
-                                #res.DischargeChannel.ramp(.1)            
-                                #res.DischargeChannel.changeReserve(bid.amount,-.2)
-                                res.setDisposition(bid.amount,-0.2)
+                                    print(" Resource {rname} is already connected".format(rname = res.name))
+                                if bid.service == "power":
+                                    #res.DischargeChannel.ramp(bid.amount)
+                                    #res.DischargeChannel.changeSetpoint(bid.amount)
+                                    res.setDisposition(bid.amount, 0)
+                                    if settings.DEBUGGING_LEVEL >= 2:
+                                        print("Power resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
+                                elif bid.service == "reserve":
+                                    #res.DischargeChannel.ramp(.1)            
+                                    #res.DischargeChannel.changeReserve(bid.amount,-.2)
+                                    res.setDisposition(bid.amount,-0.2)
+                                    if settings.DEBUGGING_LEVEL >= 2:
+                                        print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
+                            #if the resource isn't connected, connect it and ramp up power
+                            else:
+                                if bid.service == "power":
+                                    #res.connectSourceSoft("Preg",bid.amount)
+                                    #res.DischargeChannel.connectWithSet(bid.amount,0)
+                                    res.setDisposition(bid.amount,0)
+                                    if settings.DEBUGGING_LEVEL >= 2:
+                                        print("Connecting resource {rname} with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
+                                elif bid.service == "reserve":
+                                    #res.connectSourceSoft("Preg",.1)
+                                    #res.DischargeChannel.connectWithSet(bid.amount, -.2)
+                                    res.setDisposition(bid.amount, -0.2)
+                                    if settings.DEBUGGING_LEVEL >= 2:
+                                        print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
+                       
+                        elif type(res) is resource.LeadAcidBattery:
+                            if res.connected == True:
                                 if settings.DEBUGGING_LEVEL >= 2:
-                                    print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
-                        #if the resource isn't connected, connect it and ramp up power
-                        else:
-                            if bid.service == "power":
-                                #res.connectSourceSoft("Preg",bid.amount)
-                                #res.DischargeChannel.connectWithSet(bid.amount,0)
-                                res.setDisposition(bid.amount,0)
-                                if settings.DEBUGGING_LEVEL >= 2:
-                                    print("Connecting resource {rname} with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
-                            elif bid.service == "reserve":
-                                #res.connectSourceSoft("Preg",.1)
-                                #res.DischargeChannel.connectWithSet(bid.amount, -.2)
-                                res.setDisposition(bid.amount, -0.2)
-                                if settings.DEBUGGING_LEVEL >= 2:
-                                    print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
-                        
+                                    print(" Resource {rname} is already connected".format(rname = res.name))
+                             
+                            if resource.ACresource.maxDischargePower >= totaldemand:
+                                SOC = resource.LeadAcidBattery.getSOCfromOCV
+                                if SOC < 0.5:
+                                    res.setDisposition(bid.amount,-0.2)
+                                    if settings.DEBUGGING_LEVEL >= 2:
+                                        print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
+                                                              
+                            
+                            
             #disconnect resources that aren't being used anymore
             for res in self.Resources:
                 if res not in involvedResources:

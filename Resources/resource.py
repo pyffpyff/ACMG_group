@@ -385,6 +385,8 @@ class LeadAcidBattery(Storage):
     def statebehaviorcheck(self,state,input):
         input = input.components[self.name]
         state = state.components[self.name]
+        print("battery state:")
+        print(state)
         
         if state < 0.02 and input > 0:
             #print("battery is too depleted to discharge")
@@ -416,15 +418,7 @@ class ACresource(Source):
         print("inputCostFn")
         return cost
     
-    def applySimulatedInput(self,state,input,duration):
-        return 0
-
-
-
-
-
-
-
+    
 
 
 class Channel():
@@ -687,7 +681,7 @@ def makeResource(strlist,classlist,debug = False):
     def addOne(item,classlist):
         if type(item) is dict:
             resType = item.get("type",None)
-            if resType == "lead_acid_battery":
+            if resType == "LeadAcidBattery":
                 res = LeadAcidBattery(**item)
             elif resType == "ACresource":
                 res = ACresource(**item)

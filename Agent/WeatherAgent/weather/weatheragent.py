@@ -13,7 +13,7 @@ from ACMGAgent.CIP import tagClient
 from ACMGAgent.Resources.misc import listparse
 
 from . import settings
-from stubs._get_tips import temp
+#from stubs._get_tips import temp
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 

@@ -1,0 +1,12 @@
+{
+	"agentid": "utility",
+	"name": "utility1",
+	"message": "utility agent starting up",
+	"resources": [{"type":"LeadAcidBattery", "owner":"utility2", "location":"AC.COM.BUS1.MAIN","name":"Battery","capCost":10, "maxDischargePower":0.8,"dischargeChannel":2,"maxChargePower":0.8,"capacity": 50,"chargeChannel":2}
+				
+	
+]
+
+}
+
+
