@@ -1259,56 +1259,47 @@ class UtilityAgent(Agent):
                     
                     bid.printInfo(0)
                     res = listparse.lookUpByName(bid.resourceName,self.Resources)
-                    print("enact plan")
-                    print("type(res)==ACresource")
-                    print("res:")
-                    print(res)
                     if res is not None:
                         involvedResources.append(res)
                         #if the resource is already connected, change the setpoint
-                        if type(res) is resource.ACresource:
-                                                        
-                            if res.connected == True:
+                        if res.connected == True:
+                            if settings.DEBUGGING_LEVEL >= 2:
+                                print(" Resource {rname} is already connected".format(rname = res.name))
+                            if bid.service == "power":
+                                #res.DischargeChannel.ramp(bid.amount)
+                                #res.DischargeChannel.changeSetpoint(bid.amount)
+                                res.setDisposition(bid.amount, 0)
                                 if settings.DEBUGGING_LEVEL >= 2:
-                                    print(" Resource {rname} is already connected".format(rname = res.name))
-                                if bid.service == "power":
-                                    #res.DischargeChannel.ramp(bid.amount)
-                                    #res.DischargeChannel.changeSetpoint(bid.amount)
-                                    res.setDisposition(bid.amount, 0)
-                                    if settings.DEBUGGING_LEVEL >= 2:
-                                        print("Power resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
-                                elif bid.service == "reserve":
-                                    #res.DischargeChannel.ramp(.1)            
-                                    #res.DischargeChannel.changeReserve(bid.amount,-.2)
-                                    res.setDisposition(bid.amount,-0.2)
-                                    if settings.DEBUGGING_LEVEL >= 2:
-                                        print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
-                            #if the resource isn't connected, connect it and ramp up power
-                            else:
-                                if bid.service == "power":
-                                    #res.connectSourceSoft("Preg",bid.amount)
-                                    #res.DischargeChannel.connectWithSet(bid.amount,0)
-                                    res.setDisposition(bid.amount,0)
-                                    if settings.DEBUGGING_LEVEL >= 2:
-                                        print("Connecting resource {rname} with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
-                                elif bid.service == "reserve":
-                                    #res.connectSourceSoft("Preg",.1)
-                                    #res.DischargeChannel.connectWithSet(bid.amount, -.2)
-                                    res.setDisposition(bid.amount, -0.2)
-                                    if settings.DEBUGGING_LEVEL >= 2:
-                                        print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
-                       
-                        elif type(res) is resource.LeadAcidBattery:
-                            if res.connected == True:
+                                    print("Power resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
+                            elif bid.service == "reserve":
+                                #res.DischargeChannel.ramp(.1)            
+                                #res.DischargeChannel.changeReserve(bid.amount,-.2)
+                                res.setDisposition(bid.amount,-0.2)
                                 if settings.DEBUGGING_LEVEL >= 2:
-                                    print(" Resource {rname} is already connected".format(rname = res.name))
-                             
-                            if resource.ACresource.maxDischargePower >= totaldemand:
-                                SOC = resource.LeadAcidBattery.getSOCfromOCV
-                                if SOC < 0.5:
-                                    res.setDisposition(bid.amount,-0.2)
-                                    if settings.DEBUGGING_LEVEL >= 2:
-                                        print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
+                                    print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
+                        #if the resource isn't connected, connect it and ramp up power
+                        else:
+                            if bid.service == "power":
+                                #res.connectSourceSoft("Preg",bid.amount)
+                                #res.DischargeChannel.connectWithSet(bid.amount,0)
+                                res.setDisposition(bid.amount,0)
+                                if settings.DEBUGGING_LEVEL >= 2:
+                                    print("Connecting resource {rname} with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
+                            elif bid.service == "reserve":
+                                #res.connectSourceSoft("Preg",.1)
+                                #res.DischargeChannel.connectWithSet(bid.amount, -.2)
+                                res.setDisposition(bid.amount, -0.2)
+                                if settings.DEBUGGING_LEVEL >= 2:
+                                    print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
+
+
+                            
+                       #     if resource.ACresource.maxDischargePower >= totaldemand:
+                       #         SOC = resource.LeadAcidBattery.getSOCfromOCV
+                       #         if SOC < 0.5:
+                       #             res.setDisposition(bid.amount,-0.2)
+                       #             if settings.DEBUGGING_LEVEL >= 2:
+                       #                 print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
                                                               
                             
                             

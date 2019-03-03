@@ -403,7 +403,7 @@ class ACresource(Source):
         super(ACresource,self).__init__(**res)
         self.fuelCost = res["fuel_cost"]
         self.amortizationPeriod = res["amortization_period"]
-        
+        self.maxDischargePower = res["maxDischargePower"]
         self.actionpoints = [0, .1, .25, .5, 1]
         self.gridpoints = [1]
         
