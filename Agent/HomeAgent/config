@@ -4,7 +4,7 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.6,
+	"refload" : 0.4,
 	"windowlength" : 2,
 	"resources": [],
 	"appliances": 
@@ -13,7 +13,7 @@
 			"type": "light", 
 			"owner": "Figueroa",
 			"name":"Arcturus",
-			"nominalpower":0.6
+			"nominalpower":0.4
 		}
 	],
 	"preference_manager":

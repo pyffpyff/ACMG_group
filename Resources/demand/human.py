@@ -107,6 +107,7 @@ class QuadraticCostFn(object):
         self.name = "quad"
     
     def eval(self,x):
+        print("x:{x}".format(x=x))
         return self.b + self.a*(x-self.c)**2
     
     def printInfo(self,depth):

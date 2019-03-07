@@ -14,11 +14,12 @@ from volttron.platform.vip.agent import Agent, BasicCore, core, Core, PubSub, co
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 
-#from DCMGClasses.CIP import wrapper
+#from ACMGClasses.CIP import wrapper
 from ACMGAgent.CIP import tagClient
 from ACMGAgent.Resources.misc import listparse, schedule
 from ACMGAgent.Resources.mathtools import graph
 from ACMGAgent.Resources import resource, groups, control, customer
+from ACMGAgent.Agent import HomeAgent
 
 from . import settings
 from zmq.backend.cython.constants import RATE
@@ -837,39 +838,45 @@ class UtilityAgent(Agent):
         for res in self.Resources:
             newbid = None
            
-            if type(res) is resource.LeadAcidBattery:
-                amount = res.maxDischargePower
-                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.03*amount + 0.01*random.randint(0,9)
-                newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "auxilliary_service": "reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
-            elif type(res) is resource.ACresource:
+            if type(res) is resource.ACresource:
                 amount = res.maxDischargePower*.8
-                print("ACresouce rate:")
-                
                 rate = 1.2*res.fuelCost + 0.01*random.randint(0,9)
-                print(rate)
-                #rate = control.ratecalc(res.capCost,.05,res.amortizationPeriod,.2) + 0.2*totalsupply/amount
-                #need test for the amount and rate value!!!
-                newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "auxilliary_service": "reserve", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
+                newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
+                if newbid:
+                    print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
+                    self.supplyBidList.append(newbid)
+                    self.outstandingSupplyBids.append(newbid)
+                    
+                    #write to database
+                    self.dbnewbid(newbid,self.dbconn,self.t0)
+            
+            elif type(res) is resource.LeadAcidBattery:
+                amount = res.maxDischargePower
+                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
+                newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
+                if newbid:
+                    print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
+                    self.reserveBidList.append(newbid)
+                    
+                    #write to database
+                    self.dbnewbid(newbid,self.dbconn,self.t0)
+            
             else:
                 print("trying to plan for an unrecognized resource type")
             
-            if newbid:
-                print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
-                self.supplyBidList.append(newbid)
-                self.outstandingSupplyBids.append(newbid)
-                
-                #write to database
-                self.dbnewbid(newbid,self.dbconn,self.t0)
-        
-        for group in self.groupList:
-            maxLoad = self.getMaxGroupLoad(group)    
             
-                    
+        for group in self.groupList:
+            #??how to get total power of every load 
+            maxLoad = 0
+            for bid in self.demandBidList:
+                maxLoad += bid.amount
+            print("maxLoad:{maxLoad}".format(maxLoad = maxLoad))  
+                   
             #sort array of supplier bids by rate from low to high
             self.supplyBidList.sort(key = operator.attrgetter("rate"))
             #sort array of consumer bids by rate from high to low
             self.demandBidList.sort(key = operator.attrgetter("rate"),reverse = True)
-            
+                   
             if settings.DEBUGGING_LEVEL >= 2:
                 print("\n\nPLANNING for GROUP {group} for PERIOD {per}: worst case load is {max}".format(group = group.name, per = self.NextPeriod.periodNumber, max = maxLoad))
                 print(">>here are the supply bids:")
@@ -891,16 +898,8 @@ class UtilityAgent(Agent):
             rblen = len(self.reserveBidList)
             dblen = len(self.demandBidList)
             
-            print("sblen:")
-            print(sblen)
-            print("dblen:")
-            print(dblen)
             
             while supplyindex < sblen and demandindex < dblen:
-                print("supplyindex:")
-                print(supplyindex)
-                print("demandindex:")
-                print(demandindex)
                 
                 supbid = self.supplyBidList[supplyindex]
                 dembid = self.demandBidList[demandindex]
@@ -1133,18 +1132,74 @@ class UtilityAgent(Agent):
             
             self.reserveBidList.sort(key = operator.attrgetter("rate"))
             totalreserve = 0
+            leftbidlist = []         
             for bid in self.reserveBidList:
-                if totalreserve < (maxLoad - totaldemand):
+                print("maxLoad ({ml})- totalsupply({ts}): {tr}".format( ml = maxLoad,ts = totalsupply, tr = maxLoad-totalsupply))
+                if totalreserve < (maxLoad - totalsupply) and (maxLoad - totalsupply) > 0:
                     totalreserve += bid.amount
-                    if totalreserve > (maxLoad - totaldemand):
-                        #we have enough reserves, accept partial
-                        bid.accepted = True
-                        bid.modified = True
-                        bid.amount = bid.amount - (maxLoad - totaldemand - totalreserve)
+                    print("totalreserve = {tr}".format(tr = totalreserve))
+                    
+                    for leftbid in self.demandBidList:
+                        print("leftbid in demandBidlist")
+                        if leftbid.accepted == 0:
+                            leftbidlist.append(leftbid) 
+                            print("create leftbid list")
+                            
+                    print("leftbidlist: {lb}".format(lb=leftbidlist))       
+                    leftbidlist.sort(key=operator.attrgetter("rate"),reverse = True)
+                    leftlen = len(leftbidlist)
+                    leftindex = 0
+                    partialreserve = False
+                    qrem = bid.amount
+                    print("leftindex: {li}".format(li=leftindex))
+                    print("leftlen: {len}".format(len=leftlen))
+                    while leftindex<leftlen:    
+                        leftbid = leftbidlist[leftindex]
+                        print("leftbid:")  
+                        leftbid.printInfo()                     
+                        if bid.rate < leftbid.rate:
+                            group.rate = leftbid.rate
+                            print("reserve bid rate < leftbid rate")                            
+                            if qrem > leftbid.amount:
+                                qrem -= leftbid.amount
+                                leftbid.accepted = True
+                                leftindex += 1
+                                print("reserve still left")
+                            else:
+                                if qrem > 0:
+                                    leftbid.accepted = True
+                                    leftbid.amount = qrem
+                                    qrem = 0
+                                    leftindex += 1
+                                    print("partial reserve")
+                                else:
+                                    leftbid.accepted = False
+                                    leftindex += 1
+                                    print("reserve is used up")
+                        else:
+                            leftbid.accepted = False
+                            leftindex += 1
+                    bid.amount = bid.amount - qrem 
+                    if bid.amount != 0:
+                        bid.accepted = True               
+                        print("reserve bid accepted")
+                        print("bid amount = {ba}".format(ba = bid.amount))
+                                        
+                        self.sendBidAcceptance(leftbid, leftbid.rate)
+                        #update bid's entry in database
+                        self.dbupdatebid(leftbid,self.dbconn,self.t0)
+                                    
+                        #self.NextPeriod.plan.addConsumption(bid)
+                        self.NextPeriod.demandbidmanager.readybids.append(leftbid)
+                                        
+                        #give customer permission to connect
+                        cust.permission = True 
+                                          
                     else:
-                        bid.accepted = True
+                        bid.accepted = False                 
                 else: 
                     bid.accepted = False
+                    
                     
             for bid in self.reserveBidList:
                 if bid.accepted:
@@ -1167,29 +1222,9 @@ class UtilityAgent(Agent):
             for cust in group.customers:
                 self.announceRate(cust,group.rate,self.NextPeriod)
         
+        
         for plan in self.NextPeriod.plans:
             self.NextPeriod.plan.printInfo(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1274,6 +1309,7 @@ class UtilityAgent(Agent):
                             elif bid.service == "reserve":
                                 #res.DischargeChannel.ramp(.1)            
                                 #res.DischargeChannel.changeReserve(bid.amount,-.2)
+                                print("res.name: {name}".format(name = res.name))
                                 res.setDisposition(bid.amount,-0.2)
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
@@ -1294,15 +1330,7 @@ class UtilityAgent(Agent):
 
 
                             
-                       #     if resource.ACresource.maxDischargePower >= totaldemand:
-                       #         SOC = resource.LeadAcidBattery.getSOCfromOCV
-                       #         if SOC < 0.5:
-                       #             res.setDisposition(bid.amount,-0.2)
-                       #             if settings.DEBUGGING_LEVEL >= 2:
-                       #                 print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
-                                                              
-                            
-                            
+                           
             #disconnect resources that aren't being used anymore
             for res in self.Resources:
                 if res not in involvedResources:
@@ -1312,6 +1340,9 @@ class UtilityAgent(Agent):
                         if settings.DEBUGGING_LEVEL >= 2:
                             print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
 
+                           
+                     
+        
     def groundFaultHandler(self,*argv):
         fault = argv[0]
         zone = argv[1]

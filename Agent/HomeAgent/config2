@@ -5,7 +5,7 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 1,
-	"refload" : 1.8,
+	"refload" : 0.8,
 	"windowlength" : 7,
 	"resources": [],
 	"appliances": 
@@ -18,7 +18,7 @@
 			"mass":2.0,
 			"thermalresistance":28.0,
 			"maxsetpoint":40.0,
-			"nominalpower":0.6,
+			"nominalpower":0.8,
 			"deltat":10.0,
 			"inittemp":41.0
 		}

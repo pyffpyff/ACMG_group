@@ -54,6 +54,7 @@ class HomeAgent(Agent):
         self.Resources = []
         self.Appliances = []
         self.Devices = []
+        self.Appamount = 0;
         
         #name of utility enrolled with
         self.utilityName = None        
@@ -613,7 +614,8 @@ class HomeAgent(Agent):
             if comps[devkey] > 0:
                 amount += dev.getPowerFromPU(comps[devkey])
                 anydemand = True
-        
+        print("homeagent appliants total amount:")
+        print(amount)
         if anydemand:
             if settings.DEBUGGING_LEVEL >= 2:
                 print("HOMEOWNER AGENT {me} HAS DEMAND FOR period {per}".format(me = self.name, per = period.periodNumber))
