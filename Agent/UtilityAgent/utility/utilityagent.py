@@ -26,6 +26,7 @@ from zmq.backend.cython.constants import RATE
 from __builtin__ import True
 from bacpypes.vlan import Node
 from twisted.application.service import Service
+from ACMGAgent.Resources.resource import LeadAcidBattery
 #from _pydev_imps._pydev_xmlrpclib import loads
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -1279,7 +1280,7 @@ class UtilityAgent(Agent):
         #which resources are being used during this period? keep track with this list
         involvedResources = []
         #change setpoints
-        
+        grouprate = 0
         #if self.CurrentPeriod.plans:
         if self.CurrentPeriod.supplybidmanager.acceptedbids:
             #plan = self.CurrentPeriod.plans[0]
@@ -1304,6 +1305,7 @@ class UtilityAgent(Agent):
                                 #res.DischargeChannel.ramp(bid.amount)
                                 #res.DischargeChannel.changeSetpoint(bid.amount)
                                 res.setDisposition(bid.amount, 0)
+                                grouprate = bid.rate
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Power resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
                             elif bid.service == "reserve":
@@ -1311,6 +1313,7 @@ class UtilityAgent(Agent):
                                 #res.DischargeChannel.changeReserve(bid.amount,-.2)
                                 print("res.name: {name}".format(name = res.name))
                                 res.setDisposition(bid.amount,-0.2)
+                                grouprate = bid.rate
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
                         #if the resource isn't connected, connect it and ramp up power
@@ -1319,18 +1322,17 @@ class UtilityAgent(Agent):
                                 #res.connectSourceSoft("Preg",bid.amount)
                                 #res.DischargeChannel.connectWithSet(bid.amount,0)
                                 res.setDisposition(bid.amount,0)
+                                grouprate = bid.rate
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Connecting resource {rname} with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
                             elif bid.service == "reserve":
                                 #res.connectSourceSoft("Preg",.1)
                                 #res.DischargeChannel.connectWithSet(bid.amount, -.2)
                                 res.setDisposition(bid.amount, -0.2)
+                                grouprate = bid.rate
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
-
-
-                            
-                           
+              
             #disconnect resources that aren't being used anymore
             for res in self.Resources:
                 if res not in involvedResources:
@@ -1339,9 +1341,22 @@ class UtilityAgent(Agent):
                         res.DischargeChannel.disconnect()
                         if settings.DEBUGGING_LEVEL >= 2:
                             print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
-
-                           
-                     
+        
+        for elem in self.Resources:
+            if type(elem) is resource.LeadAcidBattery:
+                print("my current SOC: {soc}".format(soc=elem.SOC))
+                if elem.SOC < .5:
+                    
+                    elem.setDisposition(0.5, -0.2)
+                    print("charging battery to 0.5")
+                    for bid in self.supplyBidList:
+                        if bid.resourceName == LeadAcidBattery:
+                            bid.amount = 0.5
+                            self.sendBidAcceptance(bid,grouprate)
+                            #update to database
+                            self.dbupdatebid(bid,self.dbconn,self.t0)
+                            print("updatebid")
+              
         
     def groundFaultHandler(self,*argv):
         fault = argv[0]

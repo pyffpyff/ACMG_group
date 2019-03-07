@@ -331,6 +331,7 @@ class LeadAcidBattery(Storage):
         #get battery voltage
         voltage = self.DischargeChannel.getUnregV()
         soc = interpolation.lininterp(self.SOCtable,voltage)
+        print("getSOCfromOCV")
         return soc
     
     def getActionpoints(self,mode = "hifi"):
