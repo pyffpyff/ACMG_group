@@ -852,7 +852,7 @@ class UtilityAgent(Agent):
                     self.dbnewbid(newbid,self.dbconn,self.t0)
             
             elif type(res) is resource.LeadAcidBattery:
-                amount = res.maxDischargePower
+                amount = res.SOC
                 rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
@@ -1334,22 +1334,23 @@ class UtilityAgent(Agent):
                                     print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
               
             #disconnect resources that aren't being used anymore
-            for res in self.Resources:
-                if res not in involvedResources:
-                    if res.connected == True:
-                        #res.disconnectSourceSoft()
-                        res.DischargeChannel.disconnect()
-                        if settings.DEBUGGING_LEVEL >= 2:
-                            print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
+    #        for res in self.Resources:
+    #            if res not in involvedResources:
+    #                if res.connected == True:
+    #                    #res.disconnectSourceSoft()
+    #                    res.DischargeChannel.disconnect()
+    #                    if settings.DEBUGGING_LEVEL >= 2:
+    #                        print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
         
         for elem in self.Resources:
             if type(elem) is resource.LeadAcidBattery:
-                print("my current SOC: {soc}".format(soc=elem.SOC))
+                SOC = elem.SOC
+                print("my current SOC: {soc}".format(soc=SOC))
                 if elem.SOC < .5:
                     
-                    elem.setDisposition(0.5, -0.2)
+                    elem.setDisposition(-0.5, -0.2)
                     print("charging battery to 0.5")
-                    for bid in self.supplyBidList:
+                    for bid in self.reserveBidList:
                         if bid.resourceName == LeadAcidBattery:
                             bid.amount = 0.5
                             self.sendBidAcceptance(bid,grouprate)

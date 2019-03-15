@@ -245,10 +245,13 @@ class Storage(Source):
     def setDisposition(self,setpoint = None, offset = None):
         #indicates discharging
         if setpoint > 0:
+            print("battery need discharge")
             if self.isCharging:
+                print("was charging")
                 self.ChargeChannel.disconnect()
                 self.isCharging = False
             if self.isDischarging:
+                print("was discharging")
                 if setpoint:
                     if offset:
                         self.DischargeChannel.changeReserve(setpoint,offset)
@@ -262,10 +265,13 @@ class Storage(Source):
                 self.isDischarging = True
         #indicates charging
         elif setpoint < 0:
+            print("battery need charge")
             if self.isDischarging:
+                print("was discharging")
                 self.DischargeChannel.disconnect()
                 self.isDischarging = False
             if self.isCharging:
+                print("was charging")
                 if setpoint:
                     if offset:
                         self.ChargeChannel.changeReserve(setpoint,offset)
@@ -536,6 +542,7 @@ class Channel():
     '''changes the droop coefficient by updating the power target at the reference voltage
      and writes it to the PLC. to be used on sources that are already connected'''
     def changeSetpoint(self,newPower):
+        print("changeSetpoint")
         self.setpoint = newPower
         droopCoeff = self.setpoint/(self.noLoadVoltage - self.refVoltage)
         tagClient.writeTags([self.droopCoeffTag],[droopCoeff],"source")
@@ -544,6 +551,7 @@ class Channel():
     and writes it to the PLC. also takes a voltage offset argument. to be used with reserve
     sources that are already connected'''
     def changeReserve(self,newPower,voffset):
+        print("changereserve")
         self.setpoint = newPower
         droopCoeff = self.setpoint/(self.noLoadVoltage - self.refVoltage)
         tagClient.writeTags([self.droopCoeffTag, self.noLoadVoltageTag],[droopCoeff, self.noLoadVoltage + voffset],"source")
