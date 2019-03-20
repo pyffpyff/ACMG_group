@@ -925,7 +925,10 @@ class UtilityAgent(Agent):
                             if settings.DEBUGGING_LEVEL >= 2:
                                 print("still {qr} remaining in supply bid".format(qr = qrem))
                             partialsupply = True
+                            
+                            dembid.partialdemand = False
                             partialdemand = False
+                            dembid.leftamount = 0
                             dembid.accepted = True
                             demandindex += 1
                         elif qrem < dembid.amount:        
@@ -933,7 +936,9 @@ class UtilityAgent(Agent):
                             if settings.DEBUGGING_LEVEL >= 2:
                                 print("exhausted supply bid, now {qr} left in demand bid".format(qr = qrem))
                             partialsupply = False
+                            dembid.partialdemand = True
                             partialdemand = True
+                            dembid.leftamount = qrem
                             supbid.accepted = True
                             supplyindex += 1                            
                         else:
@@ -941,7 +946,9 @@ class UtilityAgent(Agent):
                                 print("exact match in bids")
                             qrem = 0
                             partialsupply = False
-                            partialdemand = False     
+                            dembid.partialdemand = False
+                            partialdemand = False
+                            dembid.leftamount = 0     
                             supbid.accepted = True   
                             dembid.accepted = True 
                             supplyindex += 1
@@ -955,7 +962,9 @@ class UtilityAgent(Agent):
                             if settings.DEBUGGING_LEVEL >= 2:
                                 print("still {qr} remaining in supply bid".format(qr = qrem))
                             partialsupply = False
+                            dembid.partialdemand = True
                             partialdemand = True
+                            dembid.leftamount = qrem
                             supbid.accepted = True
                             supplyindex += 1
                         elif qrem < supbid.amount:
@@ -963,6 +972,7 @@ class UtilityAgent(Agent):
                             if settings.DEBUGGING_LEVEL >= 2:
                                 print("exhausted demand bid, now {qr} left in supply bid".format(qr = qrem))
                             partialsupply = True
+                            dembid.partialdemand = False
                             partialdemand = False
                             dembid.accepted = True
                             demandindex += 1
@@ -971,6 +981,7 @@ class UtilityAgent(Agent):
                                 print("exact match in bids")
                             qrem = 0
                             partialsupply = False
+                            dembid.partialdemand = False
                             partialdemand = False
                             supbid.accepted = True   
                             dembid.accepted = True 
@@ -984,7 +995,9 @@ class UtilityAgent(Agent):
                             qrem = dembid.amount - supbid.amount
                             if settings.DEBUGGING_LEVEL >= 2:
                                 print("{qr} remaining in demand bid".format(qr = qrem))
-                            partialdemand = True
+                            dembid.partialdemand = True
+                            paritaldemand = True
+                            dembid.leftamount = qrem
                             partialsupply = False
                             supbid.accepted = True
                             dembid.accepted = True
@@ -993,6 +1006,7 @@ class UtilityAgent(Agent):
                             qrem = supbid.amount - dembid.amount
                             if settings.DEBUGGING_LEVEL >= 2:
                                 print("{qr} remaining in supply bid".format(qr = qrem))
+                            dembid.partialdemand = False
                             partialdemand = False
                             partialsupply = True
                             supbid.accepted = True
@@ -1020,6 +1034,7 @@ class UtilityAgent(Agent):
                         supbid.amount -= qrem
                         dembid.accepted = False
                         partialsupply = False
+                        dembid.partialdemand = False
                         partialdemand = False
                     elif partialdemand:
                         if settings.DEBUGGING_LEVEL >= 2:
@@ -1029,6 +1044,7 @@ class UtilityAgent(Agent):
                         dembid.amount -= qrem
                         supbid.accepted = False
                         partialsupply = False
+                        dembid.partialdemand = False
                         partialdemand = False
                     else:
                         if settings.DEBUGGING_LEVEL >= 2:
@@ -1049,6 +1065,7 @@ class UtilityAgent(Agent):
                     supbid.modified = True
                     supbid.amount -= qrem
                     partialsupply = False
+                    dembid.partialdemand = False
                     partialdemand = False
                 else:
                     if supbid.auxilliaryService:
@@ -1076,7 +1093,9 @@ class UtilityAgent(Agent):
                     dembid.modified = True
                     dembid.amount -= qrem
                     partialsupply = False
+                    dembid.partialdemand = True
                     partialdemand = False
+                    dembid.leftamount = qrem
                 else:
                     dembid.accepted = False
                 demandindex += 1
@@ -1135,29 +1154,45 @@ class UtilityAgent(Agent):
             totalreserve = 0
             leftbidlist = []         
             for bid in self.reserveBidList:
+                bid.printInfo(0)
                 print("maxLoad ({ml})- totalsupply({ts}): {tr}".format( ml = maxLoad,ts = totalsupply, tr = maxLoad-totalsupply))
                 if totalreserve < (maxLoad - totalsupply) and (maxLoad - totalsupply) > 0:
                     totalreserve += bid.amount
                     print("totalreserve = {tr}".format(tr = totalreserve))
                     
                     for leftbid in self.demandBidList:
+                        amount = 0
                         print("leftbid in demandBidlist")
-                        if leftbid.accepted == 0:
+                        leftbid.printInfo(0)
+                        print("leftbid accepted {accept}".format(accept = leftbid.accepted))
+                        print("leftbid left amount: {leftamount}".format(leftamount = leftbid.leftamount))
+                        
+                        if leftbid.accepted == 0 :
                             leftbidlist.append(leftbid) 
                             print("create leftbid list")
-                            
-                    print("leftbidlist: {lb}".format(lb=leftbidlist))       
+                        elif leftbid.partialdemand == True:
+                            amount = leftbid.amount
+                            leftbid.amount = leftbid.leftamount
+                            leftbidlist.append(leftbid)
+                            print("create leftbid list")
+                        else:
+                            pass 
+                    #for bid in leftbidlist:
+                    #    bid.printInfo(0)   
+                           
                     leftbidlist.sort(key=operator.attrgetter("rate"),reverse = True)
                     leftlen = len(leftbidlist)
                     leftindex = 0
                     partialreserve = False
-                    qrem = bid.amount
+                    qrem = totalreserve
                     print("leftindex: {li}".format(li=leftindex))
                     print("leftlen: {len}".format(len=leftlen))
                     while leftindex<leftlen:    
                         leftbid = leftbidlist[leftindex]
-                        print("leftbid:")  
-                        leftbid.printInfo()                     
+                    #    print("leftbid:")  
+                        leftbid.printInfo()   
+                        print("bid rate(reserve):{rate1}".format(rate1 = bid.rate))
+                        print("leftbid rate(demand):{rate2}".format(rate2 = leftbid.rate))                  
                         if bid.rate < leftbid.rate:
                             group.rate = leftbid.rate
                             print("reserve bid rate < leftbid rate")                            
@@ -1165,11 +1200,12 @@ class UtilityAgent(Agent):
                                 qrem -= leftbid.amount
                                 leftbid.accepted = True
                                 leftindex += 1
+                                leftbid.amount += amount 
                                 print("reserve still left")
                             else:
                                 if qrem > 0:
                                     leftbid.accepted = True
-                                    leftbid.amount = qrem
+                                    leftbid.amount = qrem + amount
                                     qrem = 0
                                     leftindex += 1
                                     print("partial reserve")
@@ -1181,8 +1217,9 @@ class UtilityAgent(Agent):
                             leftbid.accepted = False
                             leftindex += 1
                     bid.amount = bid.amount - qrem 
-                    if bid.amount != 0:
-                        bid.accepted = True               
+                    if bid.amount > 0:
+                        bid.accepted = True  
+                        bid.rate = group.rate             
                         print("reserve bid accepted")
                         print("bid amount = {ba}".format(ba = bid.amount))
                                         
@@ -1204,7 +1241,7 @@ class UtilityAgent(Agent):
                     
             for bid in self.reserveBidList:
                 if bid.accepted:
-                    self.sendBidAcceptance(bid,group.rate)
+                    self.sendBidAcceptance(bid,bid.rate)
                     
                     #update bid's entry in database
                     self.dbupdatebid(bid,self.dbconn,self.t0)
@@ -1350,6 +1387,7 @@ class UtilityAgent(Agent):
                     
                     elem.setDisposition(-0.5, -0.2)
                     print("charging battery to 0.5")
+                    print("battery SOC now is: {soc}".format(soc=elem.SOC))
                     for bid in self.reserveBidList:
                         if bid.resourceName == LeadAcidBattery:
                             bid.amount = 0.5
@@ -1357,82 +1395,189 @@ class UtilityAgent(Agent):
                             #update to database
                             self.dbupdatebid(bid,self.dbconn,self.t0)
                             print("updatebid")
-              
+
+    '''   def repairgrid(self):
+        print("Utility {nam} attempting to merge as many groups as possible".format(nam = self.name))
+        tookaction = False
         
+        #look for connections in between nodes of nonfaulted groups
+        pastouters = []
+        for outergroup in self.groupList:
+            pastouters.append(outergroup)
+            if outergroup.hasGroundFault():
+                pass
+            else:
+                for innergroup in self.groupList:
+                    #avoid treating reciprocal relationships as unique
+                    if innergroup not in pastouters:
+                        #don't try to reconnect to faulted groups
+                        if innergroup.hasGroundFault():
+                            pass
+                        #outer and inner groups are not the same and neither is faulted                    
+                        else:
+                            print("temp debug: looking at groups {og} and {ig}".format(og = outergroup.name, ig = innergroup.name))
+                            remedialactions = []
+                            
+                            #look through all nodes in the group                        
+                            for node in outergroup.nodes:
+                                #are any nodes in the other group?
+                                for edge in node.terminatingedges:
+                                    if edge.startNode in innergroup.nodes:
+                                        #found a pair of nodes
+                                        print("UTILITY {nam} found a connection between groups {og} and {ig} in edge {edg}".format(nam = self.name, og = outergroup.name, ig = innergroup.name, edg = edge.name))
+                                        #edge.closeRelays()
+                                        #return True
+                                        
+                                        action = faults.GroupMerger(edge)
+                                        remedialactions.append(action)
+                                
+                                for edge in node.originatingedges:
+                                    if edge.endNode in innergroup.nodes:
+                                        #found a pair of nodes
+                                        print("UTILITY {nam} found a connection between groups {og} and {ig} in edge {edg}".format(nam = self.name, og = outergroup.name, ig = innergroup.name, edg = edge.name))
+                                        #edge.closeRelays()
+                                        #return True
+                                        
+                                        action = faults.GroupMerger(edge)
+                                        remedialactions.append(action)
+                            
+                                #if any edges may be closed to join innergroup and outergroup
+                                if remedialactions:
+                                    #determine which of the remedial actions is best
+                                    bestaction = None
+                                    for action in remedialactions:
+                                        if bestaction:
+                                            if action.utilafter > bestaction.utilafter:
+                                                bestaction = action
+                                        else:
+                                            bestaction = action
+                                            
+                                    print("UTILITY {nam} chose {edg} as best connection between {og} and {ig}".format(nam = self.name, edg = bestaction.edge.name, og = outergroup.name, ig = innergroup.name))
+                                                
+                                    bestaction.edge.closeRelays()
+                                    tookaction = True
+                                    
+        return tookaction
+                                        
+    
     def groundFaultHandler(self,*argv):
         fault = argv[0]
         zone = argv[1]
         if fault is None:
             fault = zone.newGroundFault()
+            
+            self.dbgroundfaultevent(fault,"newly suspected fault",self.dbconn,self.t0)
+            
+                            
+            #is an existing node in the zone already persistently faulted?
+            for node in zone.nodes:
+                for exfault in node.faults:
+                    if exfault is not fault:
+                        if exfault.__class__.__name__ == "GroundFault":
+                            print("utility agent looking up existing fault {id}".format(id=exfault.uid))
+                            if exfault.state == "persistent":
+                                if node in exfault.faultednodes:
+                                    
+                                    if node not in fault.isolatednodes:
+                                        fault.isolatednodes.append(node)
+                                        
+                                    if node not in fault.faultednodes:
+                                        fault.faultednodes.append(node)
+                                        
+                                    if node not in fault.persistentnodes:
+                                        fault.persistentnodes.append(node)
+                                    
             if settings.DEBUGGING_LEVEL >= 2:
                 fault.printInfo()
-            
+
         if fault.state == "suspected":
             iunaccounted = zone.sumCurrents()
-            if abs(iunaccounted) > .1:
+            if abs(iunaccounted) > settings.UNACCOUNTED_CURRENT_THRESHOLD:                
+                
                 #pick a node to isolate first - lowest priority first
                 zone.rebuildpriorities()
                 selnode = zone.nodeprioritylist[0]
                 
-                fault.isolatenode(selnode)
+                fault.isolateNode(selnode)
                 
                 if settings.DEBUGGING_LEVEL >= 1:
-                    print("FAULT: unaccounted current {cur} indicates ground fault({sta}). Isolating node {nod}".format(cur = iunaccounted, sta = fault.state, nod = selnode.name))
+                    print("FAULT {id}: unaccounted current {cur} indicates ground fault({sta}). Isolating node {nod}".format(id = fault.uid, cur = iunaccounted, sta = fault.state, nod = selnode.name))
+                                
                 
                 #update fault state
                 fault.state = "unlocated"
                 #reschedule ground fault handler
-                schedule.msfromnow(self,60,self.groundFaultHandler,fault,zone)
+                schedule.msfromnow(self,1000,self.groundFaultHandler,fault,zone)
+                
+                self.dbgroundfaultevent(fault,"suspected fault confirmed",self.dbconn,self.t0,iunaccounted)
             else:
                 #no problem
                  
                 if settings.DEBUGGING_LEVEL >= 1:
-                    print("FAULT: suspected fault resolved")
+                    print("FAULT {id}: suspected fault resolved".format(id = fault.uid))
                 
                 fault.cleared()
+                
+                self.dbgroundfaultevent(fault,"suspected fault resolved",self.dbconn,self.t0,iunaccounted)
                
                             
         elif fault.state == "unlocated":
             #check zone to see if fault condition persists
             iunaccounted = zone.sumCurrents()
-            if abs(iunaccounted) > .1:
+            if abs(iunaccounted) > settings.UNACCOUNTED_CURRENT_THRESHOLD:
                 zone.rebuildpriorities()
+                selnode = None
                 for node in zone.nodeprioritylist:
                     if node not in fault.isolatednodes:
                         selnode = node
                         break
-                if settings.DEBUGGING_LEVEL >= 1:
-                    print("FAULT: unaccounted current of {cur} indicates ground fault still unlocated. Isolating node {sel}".format(cur = iunaccounted, sel = selnode.name))
-                    if settings.DEBUGGING_LEVEL >= 2:
-                        fault.printInfo()
-                            
-                fault.isolatenode(selnode)
-                            
-                #reschedule ground fault handler
-                schedule.msfromnow(self,60,self.groundFaultHandler,fault,zone)
-                
+                #there is another node to try in the zone
+                if selnode:
+                    if settings.DEBUGGING_LEVEL >= 1:
+                        print("FAULT {id}: unaccounted current of {cur} indicates ground fault still unlocated. Isolating node {sel}".format(id = fault.uid, cur = iunaccounted, sel = selnode.name))
+                        if settings.DEBUGGING_LEVEL >= 2:
+                            fault.printInfo()
+                                
+                    fault.isolateNode(selnode)
+                                
+                    #reschedule ground fault handler
+                    schedule.msfromnow(self,1000,self.groundFaultHandler,fault,zone)
+                    
+                    self.dbgroundfaultevent(fault,"attempting to locate",self.dbconn,self.t0,iunaccounted)
+                    
+                else:
+                    print("FAULT {id}: unaccounted current of {cur} and we are out of nodes.".format(cur=iunaccounted, id= fault.uid))
+                    fault.state == "unlocatable"
+                    schedule.msfromnow(self,5000,self.groundFaultHandler,fault,zone)
+                    
+                    self.dbgroundfaultevent(fault,"unable to locate",self.dbconn,self.t0,iunaccounted)
+                    
             else:
                 #the previously isolated node probably contained the fault
                 faultednode = fault.isolatednodes[-1]
                 fault.faultednodes.append(faultednode)
+                print("just added node {nam} to faulted nodes".format(nam = faultednode.name))
                 
-                fault.state == "located"
+                fault.state = "located"
                 #nodes in zone that are not marked faulted can be restored
-                for node in zone.nodes:
+                for node in fault.isolatednodes:
                     if node not in fault.faultednodes:
                         fault.restorenode(node)
                         
                 if settings.DEBUGGING_LEVEL >= 1:
-                    print("FAULT: located at {nod}. restoring other unfaulted nodes".format(nod = faultednode))
+                    print("FAULT: located at {nod}. restoring other unfaulted nodes".format(nod = faultednode.name))
                     if settings.DEBUGGING_LEVEL >= 2:
                         fault.printInfo()
                         
                 #reschedule
-                schedule.msfromnow(self,100,self.groundFaultHandler,fault,zone)
+                schedule.msfromnow(self,1000,self.groundFaultHandler,fault,zone)
+                
+                self.dbgroundfaultevent(fault,"fault located",self.dbconn,self.t0,iunaccounted)
                 
         elif fault.state == "located":
             #at least one faulted node has been located and isolated but there may be others
-            if abs(zone.sumCurrents()) > .1:
+            iunaccounted = zone.sumCurrents()
+            if abs(iunaccounted) > settings.UNACCOUNTED_CURRENT_THRESHOLD:
                 #there is another faulted node, go back and find it
                 fault.state = "unlocated"
                 
@@ -1441,16 +1586,24 @@ class UtilityAgent(Agent):
                     if settings.DEBUGGING_LEVEL >= 2:
                         fault.printInfo()
                 
+                self.dbgroundfaultevent(fault,"suspect multiple faults",self.dbconn,self.t0,iunaccounted)
+                
                 self.groundFaultHandler(fault,zone)
+                
             else:
+                
                 if settings.DEBUGGING_LEVEL >= 1:
                     print("FAULT: looks like we've isolated all faulted nodes and only faulted nodes.")
                 
                 #we seem to have isolated the faulted node(s)
                 if fault.reclose:
-                    fault.state = "reclose"
+                    fault.state = "reclose"                    
+                    
                     if settings.DEBUGGING_LEVEL >= 1:
                         print("FAULT: going to reclose. count: {rec}".format(rec = fault.reclosecounter))
+                        
+                    self.dbgroundfaultevent(fault,"no other faults",self.dbconn,self.t0,iunaccounted)
+                    
                 else:
                     #our reclose limit has been met
                     fault.state = "persistent"
@@ -1458,29 +1611,236 @@ class UtilityAgent(Agent):
                         print("FAULT: no more reclosing, fault is persistent.")
                 
                 #schedule next call
-                schedule.msfromnow(self,600,self.groundFaultHandler,fault,zone)
-        elif fault.state == "reclose":
-            if settings.DEBUGGING_LEVEL >= 1:
-                print("reclosing")
+                schedule.msfromnow(self,1000,self.groundFaultHandler,fault,zone)
                 
-            for node in zone:
-                fault.reclosenode()
+                
+        elif fault.state == "reclose":
+            
+            if settings.DEBUGGING_LEVEL >= 1:
+                print("reclosing on fault {id}".format(id = fault.uid))
+                fault.printInfo()
+                
+            fault.reclosezone()
+#             for node in zone.nodes:
+#                 fault.reclosenode(node)
+                
             fault.state = "suspected"
-            schedule.msfromnow(self,100,self.groundFaultHandler,fault,zone)
+            schedule.msfromnow(self,1200,self.groundFaultHandler,fault,zone)
+            self.dbgroundfaultevent(fault,"reclosing",self.dbconn,self.t0)
+            
+        elif fault.state == "unlocatable":
+            #fault can't be located because the current imbalance can't be eliminated for whatever reason
+            iunaccounted = zone.sumCurrents()
+            if abs(iunaccounted) > settings.UNACCOUNTED_CURRENT_THRESHOLD:
+                print("fault {id} is still unclocatable".format(id = fault.id))
+                fault.printInfo()                
+                schedule.msfromnow(self,5000,self.groundFaultHandler,fault,zone)
+            else:
+                #maybe the fault has abated or maybe we just can't tell that it hasn't
+                fault.state = "located"
+                schedule.msfromnow(self,1000,self.groundFaultHandler,fault,zone)
+                
+                self.dbgroundfaultevent(fault,"unlocatable fault now isolated",self.dbconn,self.t0,iunaccounted)
+                
         elif fault.state == "persistent":
             #fault hasn't resolved on its own, need to send a crew to clear fault
-            pass
-        
+            self.dbgroundfaultevent(fault,"fault deemed persistent",self.dbconn,self.t0)
+            
+            #revoke permission for customers on faulted nodes to connect
+            for node in fault.faultednodes:
+                #lock node
+                node.locknode()
+                for cust in node.customers:
+                    cust.permission = False
+                    
+            #detect topology and begin remediation for unfaulted isolated groups
+            self.getTopology()
+            self.repairgrid()
+                
+        elif fault.state == "multiple":
+            #this isn't used currently
+            zone.isolateZone()
         elif fault.state == "cleared":
             fault.cleared()
+            
+            self.dbgroundfaultevent(fault,"fault cleared",self.dbconn,self.t0)
+            
             if settings.DEBUGGING_LEVEL >= 2:
                 print("GROUND FAULT {id} has been cleared".format(id = fault.uid))
         else:
             print("Error, unrecognized fault state in {id}: {state}".format(id = fault.uid, state = fault.state))
+                
+    
+#     #monitor sensor and transducer accuracy - test one at a time to limit network impact
+#     @Core.periodic(settings.SWITCH_FAULT_INTERVAL)  
+#     def switchStateDetector(self):
+#         #wrap when we reach the end
+#         if self.edgeindex > len(self.Edges)-1:
+#             self.edgeindex = 0
+#             
+#         edge = self.Edges[self.edgeindex]
+#         
+#         #if edge.startNode.faults or edge.endNode.faults:
+#         
+#         retdict = edge.checkConsistency()
+#         
+#         measurement = retdict["measured_state"]
+#         resistance = retdict["resistance"]
+#         
+#         if retdict["reliable"]:
+#             if retdict["discrepancy"]:
+#                 print("UTILITY {me} REPORTS DISCREPANCY BETWEEN MEASURED RELAY STATE {sta} and MODEL STATE {msta} ON {nam}".format(me = self.name, sta = measurement, msta = not measurement, nam = edge.name))
+#                 self.dbrelayfault(edge.name,measurement,resistance,self.dbconn,self.t0)
+#             else:
+#                 print("UTILITY {me} REPORTS MEASURED RELAY STATE {sta} ON {nam} IS CONSISTENT WITH MODEL".format(me = self.name, sta = measurement, nam = edge.name))        
+#         else:
+#             #can't use data, good resistance measurement couldn't be obtained
+#             print("UTILITY {me} REPORTS UNUSABLE RESISTANCE DATA FOR {loc}".format(me = self.name, loc = edge.name))
+#             
 
-#delete the part of fault handler
-#delete the part of current and voltage monitor  
- 
+#    monitor for and remediate fault conditions
+    @Core.periodic(settings.FAULT_DETECTION_INTERVAL)
+    def faultDetector(self):
+        if settings.DEBUGGING_LEVEL >= 2:
+            print("running fault detection subroutine")
+            
+        nominal = True        
+        #look for brownouts
+        for node in self.nodes:
+            try:
+                voltage = node.getVoltage()
+                if voltage < settings.VOLTAGE_LOW_EMERGENCY_THRESHOLD:
+                    node.voltageLow = True
+                    node.group.voltageLow = True
+                    nominal = False
+                    if settings.DEBUGGING_LEVEL >= 1:
+                        print("!{me} detected emergency low voltage at node {nod} belonging to {grp}".format(me = self.name, nod = node.name, grp = node.group.name))
+                else:
+                    node.voltageLow = False
+                    
+                self.dbinfmeas(node.voltageTag,voltage,self.dbconn,self.t0)
+            except AttributeError:
+                #can't do anything but we don't really care
+                pass
+                
+                
+        for zone in self.zones:
+            skip = False
+            if zone.faults:
+                for fault in zone.faults:
+                    if fault.__class__.__name__ == "GroundFault":
+                        print("zone {nam} already has a ground fault".format(nam=zone.name))
+                        if fault.state != "persistent":
+                            print("fault is still in process")
+                            skip = True
+            
+            if skip:
+                print("Not checking zone {nam} because it is already known to be faulted".format(nam = zone.name))
+                continue
+            
+            currentsum = zone.sumCurrents()
+            if abs(currentsum) > settings.UNACCOUNTED_CURRENT_THRESHOLD:
+                zonenominal = False
+                #there is a mismatch and probably a line-ground fault
+                nominal = False
+                                
+                self.groundFaultHandler(None,zone)
+                
+                if settings.DEBUGGING_LEVEL >= 1:
+                    if settings.DEBUGGING_LEVEL >= 2:
+                        print("unaccounted current of {tot}".format(tot = currentsum))
+                    print("Probable line-ground Fault in {zon}.  Isolating node.".format(zon = zone.name))
+            else:
+                if settings.DEBUGGING_LEVEL >=2:
+                    print("unaccounted current of {tot} in {zon}. Probably nothing wrong".format(tot = currentsum, zon = zone.name))
+                
+        if nominal:
+            if settings.DEBUGGING_LEVEL >= 2:
+                print("No faults detected by {me}!".format(me = self.name))
+
+    @Core.periodic(settings.SECONDARY_VOLTAGE_INTERVAL)
+    def voltageMonitor(self):
+        for group in self.groupList:
+            for node in group.nodes:
+                voltage = node.getVoltage()
+                print("measuring a voltage")
+                
+                self.dbinfmeas(node.voltageTag,voltage,self.dbconn,self.t0)
+    
+    @Core.periodic(settings.INF_CURRENT_MEASUREMENT_INTERVAL)
+    def currentMonitor(self):
+        taglist = []
+        for edge in self.Edges:
+            if edge.currentTag:
+                taglist.append(edge.currentTag)
+                
+        retdict = {}
+        if taglist:
+            retdict = tagClient.readTags(taglist)
+            
+        if retdict:
+            for key in retdict:
+                self.dbinfmeas(key,retdict[key],self.dbconn,self.t0)
+    
+    def groupEfficiencyAssessment(self,group):            
+        loads = 0
+        sources = 0
+        losses = 0
+        for cust in group.customers:
+            loads += cust.measurePower()
+            
+        for res in group.resources:
+            if res.owner != self.name:
+                cust = listparse.lookUpByName(res.owner,self.customers)
+                #cust will be None if the resource belongs to the utility
+                if cust:
+                    if res.location != cust.location:
+                        #if resources are not colocated, we need to account for them separately
+                        sources += res.getDischargePower() - res.getChargePower()
+            else:
+                sources += res.getOutputRegPower() - res.getInputUnregPower()
+        
+        waste = sources - loads
+        
+        expedges = []
+        for node in group.nodes:
+            for edge in node.edges:
+                if edge not in expedges:
+                    expedges.append(edge)
+                    if edge.currentTag and edge in self.Edges:
+                        losses += edge.getPowerDissipation()
+        
+        unaccounted = waste - losses
+        
+        return loads, sources, losses 
+              
+   
+    @Core.periodic(settings.INF_EFF_MEASUREMENT_INTERVAL)        
+    def efficiencyAssessment(self):
+        #net load power consumption
+        loads = 0
+        #net source power consumption
+        sources = 0
+        #line losses
+        losses = 0  
+        
+        for group in self.groupList:
+            grouploads, groupsources, grouplosses = self.groupEfficiencyAssessment(group)
+            loads += grouploads
+            sources += groupsources
+            losses += grouplosses
+            #print('TEMP DEBUG: loads: {loads}, sources: {sources}, losses: {losses}'.format(loads = grouploads, sources = groupsources, losses = grouplosses))
+        
+        #difference
+        waste = sources - loads
+                
+        #unaccounted losses
+        unaccounted = waste - losses
+        
+        #write to database
+        self.dbnewefficiency(sources,loads,losses,unaccounted,self.dbconn,self.t0)
+        
+     '''           
     def sendBidAcceptance(self,bid,rate):
         mesdict = {}
         mesdict["message_subject"] = "bid_acceptance"

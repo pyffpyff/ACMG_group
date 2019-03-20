@@ -511,7 +511,8 @@ class DemandBid(BidBase):
         super(DemandBid,self).__init__(**biddict)
         #more stuff here later?
         self.resourceName = biddict.get("resource_name",None)
-        
+        self.partialdemand = False
+        self.leftamount = 0
     def makedict(self):
         outdict = super(DemandBid,self).makedict()
         #probably more stuff here later...
