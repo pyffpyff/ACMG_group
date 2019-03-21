@@ -513,6 +513,7 @@ class DemandBid(BidBase):
         self.resourceName = biddict.get("resource_name",None)
         self.partialdemand = False
         self.leftamount = 0
+        self.acceptedamount = 0
     def makedict(self):
         outdict = super(DemandBid,self).makedict()
         #probably more stuff here later...

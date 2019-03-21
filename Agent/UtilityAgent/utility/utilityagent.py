@@ -852,7 +852,7 @@ class UtilityAgent(Agent):
                     self.dbnewbid(newbid,self.dbconn,self.t0)
             
             elif type(res) is resource.LeadAcidBattery:
-                amount = res.SOC
+                amount = res.maxDischargePower
                 rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
@@ -1133,13 +1133,14 @@ class UtilityAgent(Agent):
                 if bid.accepted:
                     totaldemand += bid.amount
                     bid.rate = group.rate
+                                        
                     self.sendBidAcceptance(bid, group.rate)
                     #update bid's entry in database
                     self.dbupdatebid(bid,self.dbconn,self.t0)
-                    
+                        
                     #self.NextPeriod.plan.addConsumption(bid)
                     self.NextPeriod.demandbidmanager.readybids.append(bid)
-                    
+                        
                     #give customer permission to connect
                     cust.permission = True                    
                     
@@ -1161,17 +1162,19 @@ class UtilityAgent(Agent):
                     print("totalreserve = {tr}".format(tr = totalreserve))
                     
                     for leftbid in self.demandBidList:
-                        amount = 0
+                        #amount = 0
                         print("leftbid in demandBidlist")
                         leftbid.printInfo(0)
                         print("leftbid accepted {accept}".format(accept = leftbid.accepted))
                         print("leftbid left amount: {leftamount}".format(leftamount = leftbid.leftamount))
                         
                         if leftbid.accepted == 0 :
+                            leftbid.leftamount = leftbid.amount
                             leftbidlist.append(leftbid) 
                             print("create leftbid list")
                         elif leftbid.partialdemand == True:
-                            amount = leftbid.amount
+                            leftbid.acceptedamount = leftbid.amount
+                            print("amount: {am}".format(am=leftbid.acceptedamount))
                             leftbid.amount = leftbid.leftamount
                             leftbidlist.append(leftbid)
                             print("create leftbid list")
@@ -1200,12 +1203,12 @@ class UtilityAgent(Agent):
                                 qrem -= leftbid.amount
                                 leftbid.accepted = True
                                 leftindex += 1
-                                leftbid.amount += amount 
-                                print("reserve still left")
+                                leftbid.amount = leftbid.acceptedamount + leftbid.leftamount
+                                print("reserve still left {q}".format(q=qrem))
                             else:
                                 if qrem > 0:
                                     leftbid.accepted = True
-                                    leftbid.amount = qrem + amount
+                                    leftbid.amount = qrem + leftbid.acceptedamount
                                     qrem = 0
                                     leftindex += 1
                                     print("partial reserve")
@@ -1221,23 +1224,26 @@ class UtilityAgent(Agent):
                         bid.accepted = True  
                         bid.rate = group.rate             
                         print("reserve bid accepted")
-                        print("bid amount = {ba}".format(ba = bid.amount))
-                                        
-                        self.sendBidAcceptance(leftbid, leftbid.rate)
-                        #update bid's entry in database
-                        self.dbupdatebid(leftbid,self.dbconn,self.t0)
-                                    
-                        #self.NextPeriod.plan.addConsumption(bid)
-                        self.NextPeriod.demandbidmanager.readybids.append(leftbid)
-                                        
-                        #give customer permission to connect
-                        cust.permission = True 
-                                          
+                        print("bid amount = {ba}".format(ba = bid.amount))                                        
                     else:
-                        bid.accepted = False                 
+                        bid.accepted = False 
+                                    
                 else: 
                     bid.accepted = False
-                    
+            for leftbid in leftbidlist:
+                if leftbid.accepted == True:
+                    print("leftbid amount:{la}".format(la = leftbid.amount))
+                    print("leftbid left amount:{lla}".format(lla = leftbid.leftamount))
+                    self.sendBidAcceptance(leftbid, leftbid.rate)
+                    #update bid's entry in database
+                    self.dbupdatebid(leftbid,self.dbconn,self.t0)
+                                        
+                    #self.NextPeriod.plan.addConsumption(bid)
+                    self.NextPeriod.demandbidmanager.readybids.append(leftbid)
+                                            
+                    #give customer permission to connect
+                    cust.permission = True 
+                            
                     
             for bid in self.reserveBidList:
                 if bid.accepted:
