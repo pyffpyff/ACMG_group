@@ -390,20 +390,21 @@ class LeadAcidBattery(Storage):
     #state:
     #input: InputSignal class
     def statebehaviorcheck(self,state,input):
-        input = input.components[self.name]
-        state = state.components[self.name]
-        print("battery state:")
-        print(state)
-        
-        if state < 0.02 and input > 0:
+        newstate = state - input
+                
+        if newstate < 0.02 and input > 0:
             #print("battery is too depleted to discharge")
             return False
-        elif state > .98 and input < 0:
+        elif newstate > .98 and input < 0:
             #print("battery is too full to charge")
             return False
         else:
             #print("state {sta} is consistent with input {inp}".format(sta = state, inp = input))
             return True
+    
+    def setSOC(self,socvalue):
+        self.SOC = socvalue
+        
 
 class ACresource(Source):
     def __init__(self,**res):

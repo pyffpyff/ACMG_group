@@ -71,6 +71,7 @@ class UtilityAgent(Agent):
         self.outstandingSupplyBids = []
         self.outstandingDemandBids = []
         
+        self.powerfactorTag = "powerfactor"
         sys.path.append('/usr/lib/python2.7/dist-packages')
         sys.path.append('/usr/local/lib/python2.7/dist-packages')
         print(sys.path)
@@ -840,7 +841,7 @@ class UtilityAgent(Agent):
             newbid = None
            
             if type(res) is resource.ACresource:
-                amount = res.maxDischargePower*.8
+                amount = res.maxDischargePower
                 rate = 1.2*res.fuelCost + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
@@ -852,7 +853,7 @@ class UtilityAgent(Agent):
                     self.dbnewbid(newbid,self.dbconn,self.t0)
             
             elif type(res) is resource.LeadAcidBattery:
-                amount = res.maxDischargePower
+                amount = res.SOC
                 rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
@@ -1253,7 +1254,7 @@ class UtilityAgent(Agent):
                     self.dbupdatebid(bid,self.dbconn,self.t0)
                     
                     #self.NextPeriod.plan.addBid(bid)
-                    self.NextPeriod.supplybidmanager.readybids.append(bid)
+                    self.NextPeriod.supplybidmanager.acceptedbids.append(bid)
                 else:
                     self.sendBidRejection(bid,group.rate)
                 #update bid's entry in database
@@ -1268,6 +1269,7 @@ class UtilityAgent(Agent):
         
         
         for plan in self.NextPeriod.plans:
+            print("next period supply bid manager:")
             self.NextPeriod.plan.printInfo(0)
 
 
@@ -1325,11 +1327,16 @@ class UtilityAgent(Agent):
         #change setpoints
         grouprate = 0
         #if self.CurrentPeriod.plans:
+        for elem in self.Resources:
+            if type(elem) is resource.LeadAcidBattery:
+                SOC = elem.SOC
+                print("my current SOC: {soc}".format(soc=SOC))
+         
         if self.CurrentPeriod.supplybidmanager.acceptedbids:
             #plan = self.CurrentPeriod.plans[0]
             if settings.DEBUGGING_LEVEL >= 2:
                 print("UTILITY {me} IS ENACTING ITS PLAN FOR PERIOD {per}".format(me = self.name, per = self.CurrentPeriod.periodNumber))
-            
+                     
             self.CurrentPeriod.supplybidmanager.printInfo()    
             for bid in self.CurrentPeriod.supplybidmanager.acceptedbids:
                 if bid.counterparty == self.name:                    
@@ -1338,6 +1345,7 @@ class UtilityAgent(Agent):
                     
                     bid.printInfo(0)
                     res = listparse.lookUpByName(bid.resourceName,self.Resources)
+                               
                     if res is not None:
                         involvedResources.append(res)
                         #if the resource is already connected, change the setpoint
@@ -1355,6 +1363,7 @@ class UtilityAgent(Agent):
                                 #res.DischargeChannel.ramp(.1)            
                                 #res.DischargeChannel.changeReserve(bid.amount,-.2)
                                 print("res.name: {name}".format(name = res.name))
+                                
                                 res.setDisposition(bid.amount,-0.2)
                                 grouprate = bid.rate
                                 if settings.DEBUGGING_LEVEL >= 2:
@@ -1371,36 +1380,82 @@ class UtilityAgent(Agent):
                             elif bid.service == "reserve":
                                 #res.connectSourceSoft("Preg",.1)
                                 #res.DischargeChannel.connectWithSet(bid.amount, -.2)
-                                res.setDisposition(bid.amount, -0.2)
-                                grouprate = bid.rate
+                                
+                                while bid.amount > 0:
+                                    setpointamount = SOC - bid.amount
+                                    for Res in self.Resources:
+                                        if type(Res) == resource.LeadAcidBattery:
+                                            state = Res.statebehaviorcheck(SOC,bid.amount)
+                                    if state == True:
+                                        res.setSOC(setpointamount)
+                                        grouprate = bid.rate
+                                        break
+                                    else:
+                                        bid.amount -= 0.05
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
-              
+                                
             #disconnect resources that aren't being used anymore
-    #        for res in self.Resources:
-    #            if res not in involvedResources:
-    #                if res.connected == True:
-    #                    #res.disconnectSourceSoft()
-    #                    res.DischargeChannel.disconnect()
-    #                    if settings.DEBUGGING_LEVEL >= 2:
-    #                        print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
+            for res in self.Resources:
+                if res not in involvedResources:
+                    if res.connected == True:
+                        #res.disconnectSourceSoft()
+                        res.DischargeChannel.disconnect()
+                        if settings.DEBUGGING_LEVEL >= 2:
+                            print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
         
         for elem in self.Resources:
             if type(elem) is resource.LeadAcidBattery:
                 SOC = elem.SOC
                 print("my current SOC: {soc}".format(soc=SOC))
-                if elem.SOC < .5:
+        
+        for elem in self.Resources:
+            if type(elem) is resource.ACresource:
+                ACmax = elem.maxDischargePower
+        
+        for bid in self.supplyBidList:
+            if bid.resourceName == "ACresource":
+                if bid.accepted == True:
+                    leftamount = ACmax - bid.amount
+                else:
+                    leftamount = ACmax
+                print("AC max is: {acmax}, bid amount is: {bidamount}, left amount is: {leftamount}".format(acmax = ACmax, bidamount=bid.amount,leftamount=leftamount))
+                
+        for elem in self.Resources:
+            if type(elem) is resource.LeadAcidBattery:
+                SOC = elem.SOC
+                
+                if elem.SOC < .6:
+                    if (leftamount+elem.SOC) > 0.95:
+                        elem.setSOC(0.95)
+                        print("charging battery to 0.95")
+                        print("battery SOC now is: {soc}".format(soc=elem.SOC))
+                        for bid in self.reserveBidList:
+                            if bid.resourceName == LeadAcidBattery:
+                                bid.amount = 0.95
+                                self.sendBidAcceptance(bid,grouprate)
+                                #update to database
+                                self.dbupdatebid(bid,self.dbconn,self.t0)
+                                print("updatebid")
+                    else:
+                        elem.setSOC(leftamount+elem.SOC)
+                        print("charging battery to {la}".format(la = leftamount))
+                        print("battery SOC now is: {soc}".format(soc=elem.SOC))
+                        for bid in self.reserveBidList:
+                            if bid.resourceName == LeadAcidBattery:
+                                bid.amount = leftamount
+                                self.sendBidAcceptance(bid,grouprate)
+                                #update to database
+                                self.dbupdatebid(bid,self.dbconn,self.t0)
+                                print("updatebid")
                     
-                    elem.setDisposition(-0.5, -0.2)
-                    print("charging battery to 0.5")
-                    print("battery SOC now is: {soc}".format(soc=elem.SOC))
-                    for bid in self.reserveBidList:
-                        if bid.resourceName == LeadAcidBattery:
-                            bid.amount = 0.5
-                            self.sendBidAcceptance(bid,grouprate)
-                            #update to database
-                            self.dbupdatebid(bid,self.dbconn,self.t0)
-                            print("updatebid")
+                        
+            
+        Cap = self.CapNumber()
+        tagClient.writeTags(["TOTAL_CAP_DEMAND"], [Cap], "load")
+        print("capacitor number:")
+        print(Cap)        
+        #need to put into database also
 
     '''   def repairgrid(self):
         print("Utility {nam} attempting to merge as many groups as possible".format(nam = self.name))
@@ -2112,6 +2167,25 @@ class UtilityAgent(Agent):
     def resourceMeasurement(self):
         for res in self.Resources:
             self.dbupdateresource(res,self.dbconn,self.t0)
+    
+    def measurePF(self):
+        return tagClient.readTags([self.powerfactorTag],"grid")
+    
+    def CapNumber(self):
+        IndCurrent = tagClient.readTags(["IND_MAIN_CURRENT"],"load")
+        IndVoltage = tagClient.readTags(["IND_MAIN_VOLTAGE"],"load")
+        IndPower = IndCurrent * IndVoltage
+        #c is the capacity reactance of each capacitance
+        c = 1 / (60 *2 * math.pi * 0.000018)
+        powerfactor = tagClient.readTags([self.powerfactorTag],"grid")
+        if powerfactor < 0.9:
+            Q = IndPower * powerfactor
+            Qgoal = IndPower * 0.9
+            Qneed = Qgoal - Q
+        Cap = 24*24/Qneed
+        CapNumber = float(int(round(Cap / c)))
+        return CapNumber
+    
             
     def dbconsumption(self,cust,pow,dbconn,t0):
         command = 'INSERT INTO consumption (logtime, et, period, name, power) VALUES ("{time}",{et},{per},"{name}",{pow})'.format(time = datetime.utcnow().isoformat(), et = time.time() - t0, per = self.CurrentPeriod.periodNumber,name = cust.name, pow = pow)

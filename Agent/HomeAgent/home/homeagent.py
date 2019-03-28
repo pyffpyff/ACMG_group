@@ -1271,11 +1271,7 @@ class HomeAgent(Agent):
             else:
                 print("{app} is not in this period's disposition. turning it off".format(app = app.name))
                 app.on = False
-        Cap = self.CapNumber()
-        tagClient.writeTags(["TOTAL_CAP_DEMAND"], Cap, "load")
-        print("capacitor number:")
-        print(Cap)        
-        #need to put into database also
+        
         
     def disconnectLoad(self):
         #we can disconnect load at will
