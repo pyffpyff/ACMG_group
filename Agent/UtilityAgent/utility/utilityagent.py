@@ -854,6 +854,7 @@ class UtilityAgent(Agent):
             
             elif type(res) is resource.LeadAcidBattery:
                 amount = res.SOC
+                print("batter totally have {am} power".format(am = amount))
                 rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
@@ -1158,8 +1159,8 @@ class UtilityAgent(Agent):
             for bid in self.reserveBidList:
                 bid.printInfo(0)
                 print("maxLoad ({ml})- totalsupply({ts}): {tr}".format( ml = maxLoad,ts = totalsupply, tr = maxLoad-totalsupply))
-                if totalreserve < (maxLoad - totalsupply) and (maxLoad - totalsupply) > 0:
-                    totalreserve += bid.amount
+                if totalreserve < (maxLoad - totalsupply) and (maxLoad - totalsupply) > 0.001 and bid.amount > 0.021:
+                    totalreserve += (bid.amount - 0.02)
                     print("totalreserve = {tr}".format(tr = totalreserve))
                     
                     for leftbid in self.demandBidList:
@@ -1220,7 +1221,7 @@ class UtilityAgent(Agent):
                         else:
                             leftbid.accepted = False
                             leftindex += 1
-                    bid.amount = bid.amount - qrem 
+                    bid.amount = bid.amount - qrem - 0.02
                     if bid.amount > 0:
                         bid.accepted = True  
                         bid.rate = group.rate             
@@ -1233,6 +1234,15 @@ class UtilityAgent(Agent):
                     bid.accepted = False
             for leftbid in leftbidlist:
                 if leftbid.accepted == True:
+                    print("pay attention here!!!")
+                    #for Res in self.Resources:
+                    #    if type(Res)==resource.LeadAcidBattery:
+                    #        state = Res.statebehaviorcheck(SOC,leftbid.amount)
+                    #        if state == False:
+                    #            leftbid.amount = SOC - 0.02
+                    #        else:
+                    #            break  
+                        
                     print("leftbid amount:{la}".format(la = leftbid.amount))
                     print("leftbid left amount:{lla}".format(lla = leftbid.leftamount))
                     self.sendBidAcceptance(leftbid, leftbid.rate)
@@ -1380,9 +1390,9 @@ class UtilityAgent(Agent):
                             elif bid.service == "reserve":
                                 #res.connectSourceSoft("Preg",.1)
                                 #res.DischargeChannel.connectWithSet(bid.amount, -.2)
-                                
                                 while bid.amount > 0:
                                     setpointamount = SOC - bid.amount
+                                    print("SOC is : {soc}, bid amount is : {ba}, set point amount is: {spa}".format(soc = SOC, ba = bid.amount, spa = setpointamount))
                                     for Res in self.Resources:
                                         if type(Res) == resource.LeadAcidBattery:
                                             state = Res.statebehaviorcheck(SOC,bid.amount)
@@ -1391,7 +1401,10 @@ class UtilityAgent(Agent):
                                         grouprate = bid.rate
                                         break
                                     else:
-                                        bid.amount -= 0.05
+                                        bid.amount -= 0.01
+                                bid.service = "power"
+                                self.dbupdatebid(bid,self.dbconn,self.t0)
+                                print("now bid service is: {ser}".format(ser=bid.service))
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
                                 
@@ -1407,14 +1420,14 @@ class UtilityAgent(Agent):
         for elem in self.Resources:
             if type(elem) is resource.LeadAcidBattery:
                 SOC = elem.SOC
-                print("my current SOC: {soc}".format(soc=SOC))
-        
+                        
         for elem in self.Resources:
             if type(elem) is resource.ACresource:
                 ACmax = elem.maxDischargePower
         
         for bid in self.supplyBidList:
             if bid.resourceName == "ACresource":
+                chargerate = bid.rate
                 if bid.accepted == True:
                     leftamount = ACmax - bid.amount
                 else:
@@ -1424,32 +1437,37 @@ class UtilityAgent(Agent):
         for elem in self.Resources:
             if type(elem) is resource.LeadAcidBattery:
                 SOC = elem.SOC
-                
+                print("current SOC before charging is: {soc}".format(soc=SOC))
                 if elem.SOC < .6:
-                    if (leftamount+elem.SOC) > 0.95:
-                        elem.setSOC(0.95)
-                        print("charging battery to 0.95")
-                        print("battery SOC now is: {soc}".format(soc=elem.SOC))
-                        for bid in self.reserveBidList:
-                            if bid.resourceName == LeadAcidBattery:
-                                bid.amount = 0.95
-                                self.sendBidAcceptance(bid,grouprate)
-                                #update to database
-                                self.dbupdatebid(bid,self.dbconn,self.t0)
-                                print("updatebid")
-                    else:
-                        elem.setSOC(leftamount+elem.SOC)
-                        print("charging battery to {la}".format(la = leftamount))
-                        print("battery SOC now is: {soc}".format(soc=elem.SOC))
-                        for bid in self.reserveBidList:
-                            if bid.resourceName == LeadAcidBattery:
-                                bid.amount = leftamount
-                                self.sendBidAcceptance(bid,grouprate)
-                                #update to database
-                                self.dbupdatebid(bid,self.dbconn,self.t0)
-                                print("updatebid")
-                    
+                    for bid in self.reserveBidList:
+                        if bid.accepted == False:
                         
+                            if (leftamount+elem.SOC) > 0.98:
+                                #print("bid amount: {bidamount}".format(bidamount=bid.amount))
+                                elem.setSOC(0.98)
+                                print("charging battery to 0.98")
+                                print("battery SOC now is: {soc}".format(soc=elem.SOC))
+                                for bid in self.reserveBidList:
+                                    bid.accepted = True
+                                    bid.amount = 0.98 - SOC
+                                    self.sendBidAcceptance(bid,chargerate)
+                                    #update to database
+                                    self.dbupdatebid(bid,self.dbconn,self.t0)
+                                    print("updatebid")
+                            
+                            else:
+                                elem.setSOC(leftamount+elem.SOC)
+                                print("charging battery to {la}".format(la = leftamount))
+                                print("battery SOC now is: {soc}".format(soc=elem.SOC))
+                                
+                                bid.amount = leftamount
+                                bid.accepted = True
+                                self.sendBidAcceptance(bid,chargerate)
+                                #update to database
+                                self.dbupdatebid(bid,self.dbconn,self.t0)
+                                print("updatebid")
+                        else:
+                            break   
             
         Cap = self.CapNumber()
         tagClient.writeTags(["TOTAL_CAP_DEMAND"], [Cap], "load")

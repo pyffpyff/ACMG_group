@@ -392,10 +392,10 @@ class LeadAcidBattery(Storage):
     def statebehaviorcheck(self,state,input):
         newstate = state - input
                 
-        if newstate < 0.02 and input > 0:
+        if newstate < 0.019 and input > 0:
             #print("battery is too depleted to discharge")
             return False
-        elif newstate > .98 and input < 0:
+        elif newstate > .981 and input < 0:
             #print("battery is too full to charge")
             return False
         else:
