@@ -204,6 +204,7 @@ class Node(BaseNode):
         self.name = name;
         self.priorityscore = 0
         self.loadprioritylist = []
+        self.isolated = False
     
         self.grid, self.branch, self.bus, self.load = self.name.split(".")
         if self.grid == "AC":
@@ -252,11 +253,12 @@ class Node(BaseNode):
     
     def isolateNode(self):
         for edge in self.edges:
-            for relay in  edge.relays:
+        #    for relay in  edge.relays:
                 #first, record the state we were in before
-                self.savedstate[relay] = relay.closed
+        #        self.savedstate[relay] = relay.closed
             #then, open the relays
             edge.openRelays()
+        
             
     def restore(self):
         for edge in self.edges:
@@ -478,8 +480,9 @@ class Relay(object):
     
     def printInfo(self,depth = 1):
         tab = "    "
+        print(depth*tab + "RELAY: {rel}".format(rel = self.tagName))
         print(depth*tab + "STATE: {sta}".format(sta = self.closed))
-        print(depth*tab + "FAULT: {fau}".format(fau = self.faulted))
+    #    print(depth*tab + "FAULT: {fau}".format(fau = self.faulted))
         
         
         

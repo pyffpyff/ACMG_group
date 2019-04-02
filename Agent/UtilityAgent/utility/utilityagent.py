@@ -27,6 +27,7 @@ from __builtin__ import True
 from bacpypes.vlan import Node
 from twisted.application.service import Service
 from ACMGAgent.Resources.resource import LeadAcidBattery
+from ACMG_Agent.CIP.tagClient import readTags
 #from _pydev_imps._pydev_xmlrpclib import loads
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -67,7 +68,7 @@ class UtilityAgent(Agent):
         self.supplyBidList = []
         self.demandBidList = []
         self.reserveBidList = []
-        
+        self.FaultTag = []
         self.outstandingSupplyBids = []
         self.outstandingDemandBids = []
         
@@ -357,7 +358,8 @@ class UtilityAgent(Agent):
                  node.addResource(res)
             self.dbnewresource(res,self.dbconn,self.t0)
         
-        
+ 
+                
         self.perceivedInsol = .75 #per unit
         self.customers = []
         self.DRparticipants = []
@@ -1777,12 +1779,42 @@ class UtilityAgent(Agent):
 #             print("UTILITY {me} REPORTS UNUSABLE RESISTANCE DATA FOR {loc}".format(me = self.name, loc = edge.name))
 #             
 
-#    monitor for and remediate fault conditions
+#    monitor for and remediate fault conditions'''
     @Core.periodic(settings.FAULT_DETECTION_INTERVAL)
     def faultDetector(self):
         if settings.DEBUGGING_LEVEL >= 2:
             print("running fault detection subroutine")
+        for node in self.nodes:
+            location = node.name
+            localist = location.split('.')
             
+            if type(localist) is list:
+                grid, branch, bus, load = localist
+            if load == "MAIN":
+                self.FaultTag = "{branch}_{bus}_FAULT".format(branch = branch, bus = bus, load = load)
+                print(self.FaultTag)
+            else:
+                self.FaultTag = "{branch}_{bus}_{load}_FAULT".format(branch = branch, bus = bus, load = load)
+                print(self.FaultTag)
+            faultcondition = tagClient.readTags([self.FaultTag], "scenario")
+            print("node condition:{iso}".format(iso=node.isolated))    
+            if faultcondition == 1:
+                print("{node} has ground fault, need to isolate this node".format(node = node.name))
+                #self.dbrelayfault(location,faultcondition,self.dbconn,self.t0)
+                if node.isolated == False:
+                    
+                    print("isolate this node")
+                    node.isolateNode()
+                    
+                    node.isolated = True
+                    print("node condition:{iso}".format(iso=node.isolated))
+                elif node.isolated == True:
+                    print("node has already been isolated")
+            else:
+                print("No faults detected in {me}!".format(me = node.name))
+        for relay in self.relays:
+            relay.printInfo()
+    '''            
         nominal = True        
         #look for brownouts
         for node in self.nodes:
@@ -1823,7 +1855,7 @@ class UtilityAgent(Agent):
                 #there is a mismatch and probably a line-ground fault
                 nominal = False
                                 
-                self.groundFaultHandler(None,zone)
+ #               self.groundFaultHandler(None,zone)
                 
                 if settings.DEBUGGING_LEVEL >= 1:
                     if settings.DEBUGGING_LEVEL >= 2:
@@ -1836,13 +1868,13 @@ class UtilityAgent(Agent):
         if nominal:
             if settings.DEBUGGING_LEVEL >= 2:
                 print("No faults detected by {me}!".format(me = self.name))
-
+    
     @Core.periodic(settings.SECONDARY_VOLTAGE_INTERVAL)
     def voltageMonitor(self):
         for group in self.groupList:
             for node in group.nodes:
                 voltage = node.getVoltage()
-                print("measuring a voltage")
+                #print("measuring a voltage")
                 
                 self.dbinfmeas(node.voltageTag,voltage,self.dbconn,self.t0)
     
@@ -1855,7 +1887,7 @@ class UtilityAgent(Agent):
                 
         retdict = {}
         if taglist:
-            retdict = tagClient.readTags(taglist)
+            retdict = tagClient.readTags(taglist, "load")
             
         if retdict:
             for key in retdict:
@@ -1893,7 +1925,7 @@ class UtilityAgent(Agent):
         
         return loads, sources, losses 
               
-   
+    
     @Core.periodic(settings.INF_EFF_MEASUREMENT_INTERVAL)        
     def efficiencyAssessment(self):
         #net load power consumption
@@ -1919,7 +1951,7 @@ class UtilityAgent(Agent):
         #write to database
         self.dbnewefficiency(sources,loads,losses,unaccounted,self.dbconn,self.t0)
         
-     '''           
+    '''            
     def sendBidAcceptance(self,bid,rate):
         mesdict = {}
         mesdict["message_subject"] = "bid_acceptance"
