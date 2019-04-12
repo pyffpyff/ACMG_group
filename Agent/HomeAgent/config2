@@ -13,7 +13,7 @@
 		{
 			"type": "heater",
 			"owner":"utility2",
-			"name":"Pontryagin",
+			"name":"heater1",
 			"specificheatcapacity":4.184,
 			"mass":2.0,
 			"thermalresistance":28.0,

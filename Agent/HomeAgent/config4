@@ -12,8 +12,8 @@
 	[
 		{
 			"type": "heater",
-			"owner":"Farouq",
-			"name":"Chebyshev",
+			"owner":"home4",
+			"name":"heater2",
 			"specificheatcapacity":4.184,
 			"mass":4.4,
 			"thermalresistance":35.0,

@@ -11,8 +11,8 @@
 	[
 		{
 			"type": "light", 
-			"owner": "Figueroa",
-			"name":"Arcturus",
+			"owner": "home1",
+			"name":"light1",
 			"nominalpower":0.4
 		}
 	],
