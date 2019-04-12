@@ -27,7 +27,7 @@ from __builtin__ import True
 from bacpypes.vlan import Node
 from twisted.application.service import Service
 from ACMGAgent.Resources.resource import LeadAcidBattery
-from ACMG_Agent.CIP.tagClient import readTags
+from ACMGAgent.CIP.tagClient import readTags
 #from _pydev_imps._pydev_xmlrpclib import loads
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -844,7 +844,7 @@ class UtilityAgent(Agent):
            
             if type(res) is resource.ACresource:
                 amount = res.maxDischargePower
-                rate = 1.2*res.fuelCost + 0.01*random.randint(0,9)
+                rate = res.fuelCost + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
                     print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
@@ -857,7 +857,8 @@ class UtilityAgent(Agent):
             elif type(res) is resource.LeadAcidBattery:
                 amount = res.SOC
                 print("batter totally have {am} power".format(am = amount))
-                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
+#                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
+                rate = 0.05 + 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
                     print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
@@ -876,7 +877,14 @@ class UtilityAgent(Agent):
             for bid in self.demandBidList:
                 maxLoad += bid.amount
             print("maxLoad:{maxLoad}".format(maxLoad = maxLoad))  
-                   
+            maxSupply = 0
+            for bid in self.supplyBidList:
+                maxSupply += bid.amount
+            print("maxSupply:{maxSupply}".format(maxSupply = maxSupply))    
+            reserveneed = 0
+            if maxLoad > maxSupply:
+                reserveneed = 1
+            
             #sort array of supplier bids by rate from low to high
             self.supplyBidList.sort(key = operator.attrgetter("rate"))
             #sort array of consumer bids by rate from high to low
@@ -1161,7 +1169,7 @@ class UtilityAgent(Agent):
             for bid in self.reserveBidList:
                 bid.printInfo(0)
                 print("maxLoad ({ml})- totalsupply({ts}): {tr}".format( ml = maxLoad,ts = totalsupply, tr = maxLoad-totalsupply))
-                if totalreserve < (maxLoad - totalsupply) and (maxLoad - totalsupply) > 0.001 and bid.amount > 0.021:
+                if totalreserve < (maxLoad - totalsupply) and (maxLoad - totalsupply) > 0.001 and bid.amount > 0.022:
                     totalreserve += (bid.amount - 0.02)
                     print("totalreserve = {tr}".format(tr = totalreserve))
                     
@@ -1201,7 +1209,7 @@ class UtilityAgent(Agent):
                         print("bid rate(reserve):{rate1}".format(rate1 = bid.rate))
                         print("leftbid rate(demand):{rate2}".format(rate2 = leftbid.rate))                  
                         if bid.rate < leftbid.rate:
-                            group.rate = leftbid.rate
+#                            group.rate = leftbid.rate
                             print("reserve bid rate < leftbid rate")                            
                             if qrem > leftbid.amount:
                                 qrem -= leftbid.amount
@@ -1224,7 +1232,7 @@ class UtilityAgent(Agent):
                             leftbid.accepted = False
                             leftindex += 1
                     bid.amount = bid.amount - qrem - 0.02
-                    if bid.amount > 0:
+                    if bid.amount > 0.01:
                         bid.accepted = True  
                         bid.rate = group.rate             
                         print("reserve bid accepted")
@@ -1247,7 +1255,7 @@ class UtilityAgent(Agent):
                         
                     print("leftbid amount:{la}".format(la = leftbid.amount))
                     print("leftbid left amount:{lla}".format(lla = leftbid.leftamount))
-                    self.sendBidAcceptance(leftbid, leftbid.rate)
+                    self.sendBidAcceptance(leftbid, group.rate)
                     #update bid's entry in database
                     self.dbupdatebid(leftbid,self.dbconn,self.t0)
                                         
@@ -1260,7 +1268,7 @@ class UtilityAgent(Agent):
                     
             for bid in self.reserveBidList:
                 if bid.accepted:
-                    self.sendBidAcceptance(bid,bid.rate)
+                    self.sendBidAcceptance(bid,group.rate)
                     
                     #update bid's entry in database
                     self.dbupdatebid(bid,self.dbconn,self.t0)
@@ -1430,6 +1438,7 @@ class UtilityAgent(Agent):
         for bid in self.supplyBidList:
             if bid.resourceName == "ACresource":
                 chargerate = bid.rate
+                print("charge rate is : {cr}".format(cr = chargerate))
                 if bid.accepted == True:
                     leftamount = ACmax - bid.amount
                 else:
@@ -1440,12 +1449,14 @@ class UtilityAgent(Agent):
             if type(elem) is resource.LeadAcidBattery:
                 SOC = elem.SOC
                 print("current SOC before charging is: {soc}".format(soc=SOC))
+                chargeamount = 0
                 if elem.SOC < .6:
                     for bid in self.reserveBidList:
                         if bid.accepted == False:
                         
                             if (leftamount+elem.SOC) > 0.98:
                                 #print("bid amount: {bidamount}".format(bidamount=bid.amount))
+                                chargeamount = 0.98 - elem.SOC
                                 elem.setSOC(0.98)
                                 print("charging battery to 0.98")
                                 print("battery SOC now is: {soc}".format(soc=elem.SOC))
@@ -1456,20 +1467,29 @@ class UtilityAgent(Agent):
                                     #update to database
                                     self.dbupdatebid(bid,self.dbconn,self.t0)
                                     print("updatebid")
-                            
+                                                                
                             else:
                                 elem.setSOC(leftamount+elem.SOC)
                                 print("charging battery to {la}".format(la = leftamount))
                                 print("battery SOC now is: {soc}".format(soc=elem.SOC))
-                                
+                                chargeamount = leftamount
                                 bid.amount = leftamount
                                 bid.accepted = True
                                 self.sendBidAcceptance(bid,chargerate)
                                 #update to database
                                 self.dbupdatebid(bid,self.dbconn,self.t0)
                                 print("updatebid")
+                                
                         else:
-                            break   
+                            break  
+                    for bid in self.supplyBidList:
+                        if bid.resourceName == "ACresource":
+                            bid.amount += chargeamount
+                            self.sendBidAcceptance(bid,bid.rate)
+                            #update to database
+                            self.dbupdatebid(bid,self.dbconn,self.t0)
+                                
+        
             
         Cap = self.CapNumber()
         tagClient.writeTags(["TOTAL_CAP_DEMAND"], [Cap], "load")
@@ -1814,7 +1834,7 @@ class UtilityAgent(Agent):
                 print("No faults detected in {me}!".format(me = node.name))
         for relay in self.relays:
             relay.printInfo()
-    '''            
+                
         nominal = True        
         #look for brownouts
         for node in self.nodes:
@@ -1869,7 +1889,7 @@ class UtilityAgent(Agent):
             if settings.DEBUGGING_LEVEL >= 2:
                 print("No faults detected by {me}!".format(me = self.name))
     
-    @Core.periodic(settings.SECONDARY_VOLTAGE_INTERVAL)
+    '''@Core.periodic(settings.SECONDARY_VOLTAGE_INTERVAL)
     def voltageMonitor(self):
         for group in self.groupList:
             for node in group.nodes:
