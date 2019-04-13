@@ -12,7 +12,7 @@
 	[
 		{
 			"type": "heater",
-			"owner":"utility2",
+			"owner":"home2",
 			"name":"heater1",
 			"specificheatcapacity":4.184,
 			"mass":2.0,
@@ -34,8 +34,8 @@
 		[
 			[
 				{
-					"name":"Pontryagin",
-					"devicenames":["Pontryagin"],
+					"name":"heater1",
+					"devicenames":["heater1"],
 					"costfn":
 					{
 						"type":"quad",

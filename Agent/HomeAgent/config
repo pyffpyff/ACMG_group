@@ -27,8 +27,8 @@
 		[
 			[
 				{
-					"name":"Arcturus",
-					"devicenames":["Arcturus"],
+					"name":"light1",
+					"devicenames":["light1"],
 					"costfn":
 					{
 						"type":"piecewise",

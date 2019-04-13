@@ -858,7 +858,7 @@ class UtilityAgent(Agent):
                 amount = res.SOC
                 print("batter totally have {am} power".format(am = amount))
 #                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
-                rate = 0.05 + 0.01*random.randint(0,9)
+                rate = 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
                     print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
@@ -1461,11 +1461,14 @@ class UtilityAgent(Agent):
                                 print("charging battery to 0.98")
                                 print("battery SOC now is: {soc}".format(soc=elem.SOC))
                                 for bid in self.reserveBidList:
-                                    bid.accepted = True
+                                    
                                     bid.amount = 0.98 - SOC
-                                    self.sendBidAcceptance(bid,chargerate)
-                                    #update to database
-                                    self.dbupdatebid(bid,self.dbconn,self.t0)
+                                    if bid.amount > 0:
+                                        bid.accepted = True
+                                        bid.rate = chargerate
+                                        self.sendBidAcceptance(bid,chargerate)
+                                        #update to database
+                                        self.dbupdatebid(bid,self.dbconn,self.t0)
                                     print("updatebid")
                                                                 
                             else:
@@ -1474,10 +1477,12 @@ class UtilityAgent(Agent):
                                 print("battery SOC now is: {soc}".format(soc=elem.SOC))
                                 chargeamount = leftamount
                                 bid.amount = leftamount
-                                bid.accepted = True
-                                self.sendBidAcceptance(bid,chargerate)
-                                #update to database
-                                self.dbupdatebid(bid,self.dbconn,self.t0)
+                                if bid.amount > 0:
+                                    bid.accepted = True
+                                    bid.rate = chargerate
+                                    self.sendBidAcceptance(bid,chargerate)
+                                    #update to database
+                                    self.dbupdatebid(bid,self.dbconn,self.t0)
                                 print("updatebid")
                                 
                         else:
