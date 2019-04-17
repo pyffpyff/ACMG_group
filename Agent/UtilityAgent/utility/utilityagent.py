@@ -1412,6 +1412,7 @@ class UtilityAgent(Agent):
                                
                     if res is not None:
                         involvedResources.append(res)
+                        print("involved resource: {res}".format(res = res.name))
                         #if the resource is already connected, change the setpoint
                         if res.connected == True:
                             if settings.DEBUGGING_LEVEL >= 2:
@@ -1461,13 +1462,16 @@ class UtilityAgent(Agent):
                                 print("now bid service is: {ser}".format(ser=bid.service))
                                 if settings.DEBUGGING_LEVEL >= 2:
                                     print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
-                                
+                            res.connected = True    
             #disconnect resources that aren't being used anymore
             for res in self.Resources:
                 if res not in involvedResources:
+                    print("{res} resource not involved".format(res = res.name))
+                    print("resource connection: {con}".format(con = res.connected))
                     if res.connected == True:
                         #res.disconnectSourceSoft()
                         res.DischargeChannel.disconnect()
+                        res.connected = False
                         location = res.location
                         loclist = location.split('.')
                         grid, branch, bus, load = loclist
@@ -1480,6 +1484,7 @@ class UtilityAgent(Agent):
                                 relay.openRelay()
                                 print("open relay {relayname} for disconnected resource {res}".format(relayname = relayname, res=bid.resourceName))
                      
+                    
                         if settings.DEBUGGING_LEVEL >= 2:
                             print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
         
@@ -1553,7 +1558,8 @@ class UtilityAgent(Agent):
                                     if relay.tagName == relayname:
                                         relay.closeRelay()
                                         print("close relay {relayname} for connected resource {res}".format(relayname = relayname, res=bid.resourceName))
-                            
+                            elem.connected == True
+                            involvedResources.append(elem)
                         else:
                             break  
                     for bid in self.supplyBidList:
