@@ -1559,6 +1559,7 @@ class UtilityAgent(Agent):
                                         relay.closeRelay()
                                         print("close relay {relayname} for connected resource {res}".format(relayname = relayname, res=bid.resourceName))
                             elem.connected == True
+                            print("battery connection: {con}".format(con = elem.connected))
                             involvedResources.append(elem)
                         else:
                             break  
