@@ -135,10 +135,10 @@ class UtilityAgent(Agent):
                        groups.Relay("COM_BUS1LOAD5_USER", "load"),
                        groups.Relay("COM_BUS2_USER", "load"),
                        groups.Relay("COM_BUS2LOAD1_USER", "load"),
-                       groups.Relay("COM_BUS1LOAD2_USER", "load"),
-                       groups.Relay("COM_BUS1LOAD3_USER", "load"),
-                       groups.Relay("COM_BUS1LOAD4_USER", "load"),
-                       groups.Relay("COM_BUS1LOAD5_USER", "load"),
+                       groups.Relay("COM_BUS2LOAD2_USER", "load"),
+                       groups.Relay("COM_BUS2LOAD3_USER", "load"),
+                       groups.Relay("COM_BUS2LOAD4_USER", "load"),
+                       groups.Relay("COM_BUS2LOAD5_USER", "load"),
                        groups.Relay("IND_MAIN_USER", "load"),
                        groups.Relay("IND_BUS1_USER", "load"),
                        groups.Relay("IND_BUS1LOAD1_USER", "load"),
@@ -148,10 +148,10 @@ class UtilityAgent(Agent):
                        groups.Relay("IND_BUS1LOAD5_USER", "load"),
                        groups.Relay("IND_BUS2_USER", "load"),
                        groups.Relay("IND_BUS2LOAD1_USER", "load"),
-                       groups.Relay("IND_BUS1LOAD2_USER", "load"),
-                       groups.Relay("IND_BUS1LOAD3_USER", "load"),
-                       groups.Relay("IND_BUS1LOAD4_USER", "load"),
-                       groups.Relay("IND_BUS1LOAD5_USER", "load"),
+                       groups.Relay("IND_BUS2LOAD2_USER", "load"),
+                       groups.Relay("IND_BUS2LOAD3_USER", "load"),
+                       groups.Relay("IND_BUS2LOAD4_USER", "load"),
+                       groups.Relay("IND_BUS2LOAD5_USER", "load"),
                        groups.Relay("RES_MAIN_USER", "load"),
                        groups.Relay("RES_BUS1_USER", "load"),
                        groups.Relay("RES_BUS1LOAD1_USER", "load"),
@@ -386,56 +386,56 @@ class UtilityAgent(Agent):
         self.relays[0].closeRelay()
         self.relays[1].closeRelay()
         self.relays[2].closeRelay()
-        self.relays[3].closeRelay()
-        self.relays[4].closeRelay()
-        self.relays[5].closeRelay()
-        self.relays[6].closeRelay()
-        self.relays[7].closeRelay()
+        self.relays[3].openRelay()
+        self.relays[4].openRelay()
+        self.relays[5].openRelay()
+        self.relays[6].openRelay()
+        self.relays[7].openRelay()
         self.relays[8].closeRelay()
-        self.relays[9].closeRelay()
-        self.relays[10].closeRelay()
-        self.relays[11].closeRelay()
-        self.relays[12].closeRelay()
-        self.relays[13].closeRelay()
+        self.relays[9].openRelay()
+        self.relays[10].openRelay()
+        self.relays[11].openRelay()
+        self.relays[12].openRelay()
+        self.relays[13].openRelay()
         self.relays[14].closeRelay()
         self.relays[15].closeRelay()
-        self.relays[16].closeRelay()
-        self.relays[17].closeRelay()
-        self.relays[18].closeRelay()
-        self.relays[19].closeRelay()
-        self.relays[20].closeRelay()
+        self.relays[16].openRelay()
+        self.relays[17].openRelay()
+        self.relays[18].openRelay()
+        self.relays[19].openRelay()
+        self.relays[20].openRelay()
         self.relays[21].closeRelay()
-        self.relays[22].closeRelay()
-        self.relays[23].closeRelay()
-        self.relays[24].closeRelay()
-        self.relays[25].closeRelay()
-        self.relays[26].closeRelay()
+        self.relays[22].openRelay()
+        self.relays[23].openRelay()
+        self.relays[24].openRelay()
+        self.relays[25].openRelay()
+        self.relays[26].openRelay()
         self.relays[27].closeRelay()
         self.relays[28].closeRelay()
-        self.relays[29].closeRelay()
-        self.relays[30].closeRelay()
-        self.relays[31].closeRelay()
-        self.relays[32].closeRelay()
-        self.relays[33].closeRelay()
+        self.relays[29].openRelay()
+        self.relays[30].openRelay()
+        self.relays[31].openRelay()
+        self.relays[32].openRelay()
+        self.relays[33].openRelay()
         self.relays[34].closeRelay()
-        self.relays[35].closeRelay()
-        self.relays[36].closeRelay()
-        self.relays[37].closeRelay()
-        self.relays[38].closeRelay()
-        self.relays[39].closeRelay()
+        self.relays[35].openRelay()
+        self.relays[36].openRelay()
+        self.relays[37].openRelay()
+        self.relays[38].openRelay()
+        self.relays[39].openRelay()
         self.relays[40].closeRelay()
-        self.relays[41].closeRelay()
-        self.relays[42].closeRelay()
-        self.relays[43].closeRelay()
-        self.relays[44].closeRelay()
-        self.relays[45].closeRelay()
+        self.relays[41].openRelay()
+        self.relays[42].openRelay()
+        self.relays[43].openRelay()
+        self.relays[44].openRelay()
+        self.relays[45].openRelay()
         self.relays[46].closeRelay()
-        self.relays[47].closeRelay()
-        self.relays[48].closeRelay()
-        self.relays[49].closeRelay()
-        self.relays[50].closeRelay()
-        self.relays[51].closeRelay()
-        
+        self.relays[47].openRelay()
+        self.relays[48].openRelay()
+        self.relays[49].openRelay()
+        self.relays[50].openRelay()
+        self.relays[51].openRelay()
+
        
         
     def exit_handler(self,dbconn):
@@ -1122,6 +1122,19 @@ class UtilityAgent(Agent):
                     totalsupply += bid.amount
                     bid.rate = group.rate
                     self.sendBidAcceptance(bid, group.rate)
+                    res = listparse.lookUpByName(bid.resourceName,group.resources)
+                    '''location = res.location
+                    loclist = location.split('.')
+                    grid, branch, bus, load = loclist
+                    if load == "MAIN":
+                        relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
+                    else:
+                        relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
+                    for relay in self.relays:
+                        if relay.tagName == relayname:
+                            relay.closeRelay()
+                            print("close relay for connected resource")
+                    '''
                     #update bid's entry in database
                     self.dbupdatebid(bid,self.dbconn,self.t0)
                     
@@ -1130,7 +1143,6 @@ class UtilityAgent(Agent):
                     
                     
                     #give customer permission to connect if resource is co-located
-                    res = listparse.lookUpByName(bid.resourceName,group.resources)
                     cust = listparse.lookUpByName(bid.counterparty,self.customers)
                     if cust:
                         if res.location == cust.location:
@@ -1257,7 +1269,19 @@ class UtilityAgent(Agent):
                     
                     #update bid's entry in database
                     self.dbupdatebid(bid,self.dbconn,self.t0)
-                    
+                    res = listparse.lookUpByName(bid.resourceName,group.resources)
+                    '''location = res.location
+                    loclist = location.split('.')
+                    grid, branch, bus, load = loclist
+                    if load == "MAIN":
+                        relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
+                    else:
+                        relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
+                    for relay in self.relays:
+                        if relay.tagName == relayname:
+                            relay.closeRelay()
+                            print("close relay for connected resource")
+                    '''
                     #self.NextPeriod.plan.addBid(bid)
                     self.NextPeriod.supplybidmanager.acceptedbids.append(bid)
                 else:
@@ -1374,6 +1398,17 @@ class UtilityAgent(Agent):
                     
                     bid.printInfo(0)
                     res = listparse.lookUpByName(bid.resourceName,self.Resources)
+                    location = res.location
+                    loclist = location.split('.')
+                    grid, branch, bus, load = loclist
+                    if load == "MAIN":
+                        relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
+                    else:
+                        relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
+                    for relay in self.relays:
+                        if relay.tagName == relayname:
+                            relay.closeRelay()
+                            print("close relay {relayname} for connected resource {res}".format(relayname = relayname, res=bid.resourceName))
                                
                     if res is not None:
                         involvedResources.append(res)
@@ -1433,6 +1468,18 @@ class UtilityAgent(Agent):
                     if res.connected == True:
                         #res.disconnectSourceSoft()
                         res.DischargeChannel.disconnect()
+                        location = res.location
+                        loclist = location.split('.')
+                        grid, branch, bus, load = loclist
+                        if load == "MAIN":
+                            relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
+                        else:
+                            relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
+                        for relay in self.relays:
+                            if relay.tagName == relayname:
+                                relay.openRelay()
+                                print("open relay {relayname} for disconnected resource {res}".format(relayname = relayname, res=bid.resourceName))
+                     
                         if settings.DEBUGGING_LEVEL >= 2:
                             print("Resource {rname} no longer required and is being disconnected".format(rname = res.name))
         
@@ -1494,6 +1541,19 @@ class UtilityAgent(Agent):
                                     self.dbupdatebid(bid,self.dbconn,self.t0)
                                 print("updatebid")
                                 
+                            res = listparse.lookUpByName(bid.resourceName,self.Resources)
+                            location = res.location
+                            loclist = location.split('.')
+                            grid, branch, bus, load = loclist
+                            if load == "MAIN":
+                                relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
+                            else:
+                                relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
+                                for relay in self.relays:
+                                    if relay.tagName == relayname:
+                                        relay.closeRelay()
+                                        print("close relay {relayname} for connected resource {res}".format(relayname = relayname, res=bid.resourceName))
+                            
                         else:
                             break  
                     for bid in self.supplyBidList:

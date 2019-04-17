@@ -387,6 +387,7 @@ class BidManager(object):
         
         if bid.resourceName:
             self.period.disposition.components[bid.resourceName] = DeviceDisposition(bid.resourceName,bid.amount,mode)
+            self.period.disposition.closeRelay = True
         else:
             if bid.side == "demand":
                 self.period.disposition.closeRelay = True

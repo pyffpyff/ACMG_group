@@ -125,6 +125,7 @@ class Zone(object):
     def isolateZone(self):
         for edge in self.interzonaledges:
             edge.openRelays()
+            print("open relays when isolate zone")
     
     
     def findinterzonaledges(self):
@@ -195,6 +196,7 @@ class BaseNode(object):
             if edge.startNode is self or edge.endNode is self:
                 otherNode.edges.remove(edge)
                 self.edges.remove(edge)
+                print("edge {edge} is removed".format(edge = edge))
                 
         
 class Node(BaseNode):
@@ -257,6 +259,7 @@ class Node(BaseNode):
                 #first, record the state we were in before
         #        self.savedstate[relay] = relay.closed
                 relay.openRelay()
+                print("isolate this node and open relay")
             #then, open the relays
             
      #       edge.openRelays()
@@ -406,6 +409,7 @@ class DirEdge(object):
     def openRelays(self):
         for relay in self.relays:
             relay.openRelay()
+            print("openRelays")
     
     def closeRelays(self):
         for relay in self.relays:
@@ -450,6 +454,7 @@ class Relay(object):
             retval = tagClient.readTags([self.tagName],"load")
 #        retval = not retval
         self.closed = retval
+        
         return retval
     
     def closeRelay(self):
@@ -459,7 +464,7 @@ class Relay(object):
             tagClient.writeTags([self.tagName],[True],"grid")
         elif self.type == "load" and self.branch != "main":
             tagClient.writeTags([self.tagName],[True],"load")
-        
+        print("close relay")
         self.closed = True
     
 # no infrastructure
@@ -469,6 +474,7 @@ class Relay(object):
         elif self.type == "load" and self.branch != "main":
              tagClient.writeTags([self.tagName],[False],"load")
         self.closed = False
+        print("open relay")
         
     def setFault(self):
         for node in self.owningNodes:
