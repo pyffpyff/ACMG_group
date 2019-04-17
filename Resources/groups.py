@@ -253,11 +253,13 @@ class Node(BaseNode):
     
     def isolateNode(self):
         for edge in self.edges:
-        #    for relay in  edge.relays:
+            for relay in  edge.relays:
                 #first, record the state we were in before
         #        self.savedstate[relay] = relay.closed
+                relay.openRelay()
             #then, open the relays
-            edge.openRelays()
+            
+     #       edge.openRelays()
         
             
     def restore(self):

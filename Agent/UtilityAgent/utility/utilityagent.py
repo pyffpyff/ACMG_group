@@ -125,7 +125,8 @@ class UtilityAgent(Agent):
         
         #build grid model objects from the agent's a priori knowledge of system
         #infrastructure relays
-        self.relays =[ groups.Relay("COM_MAIN_USER", "load"),
+        self.relays =[ groups.Relay("MAIN_MAIN_USER","load"),
+                       groups.Relay("COM_MAIN_USER", "load"),
                        groups.Relay("COM_BUS1_USER", "load"),
                        groups.Relay("COM_BUS1LOAD1_USER", "load"),
                        groups.Relay("COM_BUS1LOAD2_USER", "load"),
@@ -179,7 +180,8 @@ class UtilityAgent(Agent):
                        
                        ]
                                               
-        self.nodes = [ groups.Node("AC.COM.MAIN.MAIN"),
+        self.nodes = [ groups.Node("AC.MAIN.MAIN.MAIN"),
+                       groups.Node("AC.COM.MAIN.MAIN"),
                        groups.Node("AC.COM.BUS1.MAIN"),
                        groups.Node("AC.COM.BUS1.LOAD1"),
                        groups.Node("AC.COM.BUS1.LOAD2"),
@@ -236,115 +238,115 @@ class UtilityAgent(Agent):
 #            print node
             
                       
-        self.zones=[groups.Zone("AC.COM.MAINgroups.Zone",[self.nodes[0]]),
-                    groups.Zone("AC.COM.BUS1.groups.Zone",[self.nodes[1]]),
-                    groups.Zone("AC.COM.BUS1.groups.Zone1",[self.nodes[2]]),
-                    groups.Zone("AC.COM.BUS1.groups.Zone2",[self.nodes[3]]),
-                    groups.Zone("AC.COM.BUS1.groups.Zone3",[self.nodes[4]]),
-                    groups.Zone("AC.COM.BUS1.groups.Zone4",[self.nodes[5]]),
-                    groups.Zone("AC.COM.BUS1.groups.Zone5",[self.nodes[6]]),
-                    groups.Zone("AC.COM.BUS2.groups.Zone",[self.nodes[7]]),
-                    groups.Zone("AC.COM.BUS2.groups.Zone1",[self.nodes[8]]),
-                    groups.Zone("AC.COM.BUS2.groups.Zone2",[self.nodes[9]]),
-                    groups.Zone("AC.COM.BUS2.groups.Zone3",[self.nodes[10]]),
-                    groups.Zone("AC.COM.BUS2.groups.Zone4",[self.nodes[11]]),
-                    groups.Zone("AC.COM.BUS2.groups.Zone5",[self.nodes[12]]),
-                    groups.Zone("AC.IND.MAINgroups.Zone",[self.nodes[13]]),
-                    groups.Zone("AC.IND.BUS1.groups.Zone",[self.nodes[14]]),
-                    groups.Zone("AC.IND.BUS1.groups.Zone1",[self.nodes[15]]),
-                    groups.Zone("AC.IND.BUS1.groups.Zone2",[self.nodes[16]]),
-                    groups.Zone("AC.IND.BUS1.groups.Zone3",[self.nodes[17]]),
-                    groups.Zone("AC.IND.BUS1.groups.Zone4",[self.nodes[18]]),
-                    groups.Zone("AC.IND.BUS1.groups.Zone5",[self.nodes[19]]),
-                    groups.Zone("AC.IND.BUS2.groups.Zone",[self.nodes[20]]),
-                    groups.Zone("AC.IND.BUS2.groups.Zone1",[self.nodes[21]]),
-                    groups.Zone("AC.IND.BUS2.groups.Zone2",[self.nodes[22]]),
-                    groups.Zone("AC.IND.BUS2.groups.Zone3",[self.nodes[23]]),
-                    groups.Zone("AC.IND.BUS2.groups.Zone4",[self.nodes[24]]),
-                    groups.Zone("AC.IND.BUS2.groups.Zone5",[self.nodes[25]]),
-                    groups.Zone("AC.RES.MAINgroups.Zone",[self.nodes[26]]),
-                    groups.Zone("AC.RES.BUS1.groups.Zone",[self.nodes[27]]),
-                    groups.Zone("AC.RES.BUS1.groups.Zone1",[self.nodes[28]]),
-                    groups.Zone("AC.RES.BUS1.groups.Zone2",[self.nodes[29]]),
-                    groups.Zone("AC.RES.BUS1.groups.Zone3",[self.nodes[30]]),
-                    groups.Zone("AC.RES.BUS1.groups.Zone4",[self.nodes[31]]),
-                    groups.Zone("AC.RES.BUS1.groups.Zone5",[self.nodes[32]]),
-                    groups.Zone("AC.RES.BUS2.groups.Zone",[self.nodes[33]]),
-                    groups.Zone("AC.RES.BUS2.groups.Zone1",[self.nodes[34]]),
-                    groups.Zone("AC.RES.BUS2.groups.Zone2",[self.nodes[35]]),
-                    groups.Zone("AC.RES.BUS2.groups.Zone3",[self.nodes[36]]),
-                    groups.Zone("AC.RES.BUS2.groups.Zone4",[self.nodes[37]]),
-                    groups.Zone("AC.RES.BUS2.groups.Zone5",[self.nodes[38]]),
-                    groups.Zone("AC.RES.BUS3.groups.Zone",[self.nodes[39]]),
-                    groups.Zone("AC.RES.BUS3.groups.Zone1",[self.nodes[40]]),
-                    groups.Zone("AC.RES.BUS3.groups.Zone2",[self.nodes[41]]),
-                    groups.Zone("AC.RES.BUS3.groups.Zone3",[self.nodes[42]]),
-                    groups.Zone("AC.RES.BUS3.groups.Zone4",[self.nodes[43]]),
-                    groups.Zone("AC.RES.BUS3.groups.Zone5",[self.nodes[44]]),
-                    groups.Zone("AC.RES.BUS4.groups.Zone",[self.nodes[45]]),
-                    groups.Zone("AC.RES.BUS4.groups.Zone1",[self.nodes[46]]),
-                    groups.Zone("AC.RES.BUS4.groups.Zone2",[self.nodes[47]]),
-                    groups.Zone("AC.RES.BUS4.groups.Zone3",[self.nodes[48]]),
-                    groups.Zone("AC.RES.BUS4.groups.Zone4",[self.nodes[49]]),
-                    groups.Zone("AC.RES.BUS4.groups.Zone5",[self.nodes[50]]),
+        self.zones=[groups.Zone("AC.MAIN.MAIN.groups.Zone",[self.nodes[0]]),
+                    groups.Zone("AC.COM.MAIN.groups.Zone",[self.nodes[1]]),
+                    groups.Zone("AC.COM.BUS1.groups.Zone",[self.nodes[2]]),
+                    groups.Zone("AC.COM.BUS1.groups.Zone1",[self.nodes[3]]),
+                    groups.Zone("AC.COM.BUS1.groups.Zone2",[self.nodes[4]]),
+                    groups.Zone("AC.COM.BUS1.groups.Zone3",[self.nodes[5]]),
+                    groups.Zone("AC.COM.BUS1.groups.Zone4",[self.nodes[6]]),
+                    groups.Zone("AC.COM.BUS1.groups.Zone5",[self.nodes[7]]),
+                    groups.Zone("AC.COM.BUS2.groups.Zone",[self.nodes[8]]),
+                    groups.Zone("AC.COM.BUS2.groups.Zone1",[self.nodes[9]]),
+                    groups.Zone("AC.COM.BUS2.groups.Zone2",[self.nodes[10]]),
+                    groups.Zone("AC.COM.BUS2.groups.Zone3",[self.nodes[11]]),
+                    groups.Zone("AC.COM.BUS2.groups.Zone4",[self.nodes[12]]),
+                    groups.Zone("AC.COM.BUS2.groups.Zone5",[self.nodes[13]]),
+                    groups.Zone("AC.IND.MAIN.groups.Zone",[self.nodes[14]]),
+                    groups.Zone("AC.IND.BUS1.groups.Zone",[self.nodes[15]]),
+                    groups.Zone("AC.IND.BUS1.groups.Zone1",[self.nodes[16]]),
+                    groups.Zone("AC.IND.BUS1.groups.Zone2",[self.nodes[17]]),
+                    groups.Zone("AC.IND.BUS1.groups.Zone3",[self.nodes[18]]),
+                    groups.Zone("AC.IND.BUS1.groups.Zone4",[self.nodes[19]]),
+                    groups.Zone("AC.IND.BUS1.groups.Zone5",[self.nodes[20]]),
+                    groups.Zone("AC.IND.BUS2.groups.Zone",[self.nodes[21]]),
+                    groups.Zone("AC.IND.BUS2.groups.Zone1",[self.nodes[22]]),
+                    groups.Zone("AC.IND.BUS2.groups.Zone2",[self.nodes[23]]),
+                    groups.Zone("AC.IND.BUS2.groups.Zone3",[self.nodes[24]]),
+                    groups.Zone("AC.IND.BUS2.groups.Zone4",[self.nodes[25]]),
+                    groups.Zone("AC.IND.BUS2.groups.Zone5",[self.nodes[26]]),
+                    groups.Zone("AC.RES.MAIN.groups.Zone",[self.nodes[27]]),
+                    groups.Zone("AC.RES.BUS1.groups.Zone",[self.nodes[28]]),
+                    groups.Zone("AC.RES.BUS1.groups.Zone1",[self.nodes[29]]),
+                    groups.Zone("AC.RES.BUS1.groups.Zone2",[self.nodes[30]]),
+                    groups.Zone("AC.RES.BUS1.groups.Zone3",[self.nodes[31]]),
+                    groups.Zone("AC.RES.BUS1.groups.Zone4",[self.nodes[32]]),
+                    groups.Zone("AC.RES.BUS1.groups.Zone5",[self.nodes[33]]),
+                    groups.Zone("AC.RES.BUS2.groups.Zone",[self.nodes[34]]),
+                    groups.Zone("AC.RES.BUS2.groups.Zone1",[self.nodes[35]]),
+                    groups.Zone("AC.RES.BUS2.groups.Zone2",[self.nodes[36]]),
+                    groups.Zone("AC.RES.BUS2.groups.Zone3",[self.nodes[37]]),
+                    groups.Zone("AC.RES.BUS2.groups.Zone4",[self.nodes[38]]),
+                    groups.Zone("AC.RES.BUS2.groups.Zone5",[self.nodes[39]]),
+                    groups.Zone("AC.RES.BUS3.groups.Zone",[self.nodes[40]]),
+                    groups.Zone("AC.RES.BUS3.groups.Zone1",[self.nodes[41]]),
+                    groups.Zone("AC.RES.BUS3.groups.Zone2",[self.nodes[42]]),
+                    groups.Zone("AC.RES.BUS3.groups.Zone3",[self.nodes[43]]),
+                    groups.Zone("AC.RES.BUS3.groups.Zone4",[self.nodes[44]]),
+                    groups.Zone("AC.RES.BUS3.groups.Zone5",[self.nodes[45]]),
+                    groups.Zone("AC.RES.BUS4.groups.Zone",[self.nodes[46]]),
+                    groups.Zone("AC.RES.BUS4.groups.Zone1",[self.nodes[47]]),
+                    groups.Zone("AC.RES.BUS4.groups.Zone2",[self.nodes[48]]),
+                    groups.Zone("AC.RES.BUS4.groups.Zone3",[self.nodes[49]]),
+                    groups.Zone("AC.RES.BUS4.groups.Zone4",[self.nodes[50]]),
+                    groups.Zone("AC.RES.BUS4.groups.Zone5",[self.nodes[51]]),
                     
                     ]
         self.Edges = []
         
         #global index for checking relay consistency
         self.edgeindex = 0
-        self.Edges.append(self.nodes[0].addEdge(self.nodes[1], "to", "COM_BUS1_CURRENT", [self.relays[1]]))
-        self.Edges.append(self.nodes[0].addEdge(self.nodes[7], "to", "COM_BUS2_CURRENT", [self.relays[7]]))
-        self.Edges.append(self.nodes[1].addEdge(self.nodes[2], "to", "COM_B1L1_CURRENT", [self.relays[2]]))              
-        self.Edges.append(self.nodes[1].addEdge(self.nodes[3], "to", "COM_B1L2_CURRENT", [self.relays[3]]))
-        self.Edges.append(self.nodes[1].addEdge(self.nodes[4], "to", "COM_B1L3_CURRENT", [self.relays[4]]))              
-        self.Edges.append(self.nodes[1].addEdge(self.nodes[5], "to", "COM_B1L4_CURRENT", [self.relays[5]]))              
-        self.Edges.append(self.nodes[1].addEdge(self.nodes[6], "to", "COM_B1L5_CURRENT", [self.relays[6]]))
-        self.Edges.append(self.nodes[7].addEdge(self.nodes[8], "to", "COM_B2L1_CURRENT", [self.relays[8]]))                                                        
-        self.Edges.append(self.nodes[7].addEdge(self.nodes[9], "to", "COM_B2L2_CURRENT", [self.relays[9]]))
-        self.Edges.append(self.nodes[7].addEdge(self.nodes[10], "to", "COM_B2L3_CURRENT", [self.relays[10]]))
-        self.Edges.append(self.nodes[7].addEdge(self.nodes[11], "to", "COM_B2L4_CURRENT", [self.relays[11]]))
-        self.Edges.append(self.nodes[7].addEdge(self.nodes[12], "to", "COM_B2L5_CURRENT", [self.relays[12]]))
-        self.Edges.append(self.nodes[13].addEdge(self.nodes[14], "to", "IND_BUS1_CURRENT", [self.relays[14]]))
-        self.Edges.append(self.nodes[13].addEdge(self.nodes[20], "to", "IND_BUS2_CURRENT", [self.relays[20]]))
-        self.Edges.append(self.nodes[14].addEdge(self.nodes[15], "to", "IND_B1L1_CURRENT", [self.relays[15]]))
-        self.Edges.append(self.nodes[14].addEdge(self.nodes[16], "to", "IND_B1L2_CURRENT", [self.relays[16]]))
-        self.Edges.append(self.nodes[14].addEdge(self.nodes[17], "to", "IND_B1L3_CURRENT", [self.relays[17]]))
-        self.Edges.append(self.nodes[14].addEdge(self.nodes[18], "to", "IND_B1L4_CURRENT", [self.relays[18]]))
-        self.Edges.append(self.nodes[14].addEdge(self.nodes[19], "to", "IND_B1L5_CURRENT", [self.relays[19]]))
-        self.Edges.append(self.nodes[20].addEdge(self.nodes[21], "to", "IND_B2L1_CURRENT", [self.relays[21]]))
-        self.Edges.append(self.nodes[20].addEdge(self.nodes[22], "to", "IND_B2L2_CURRENT", [self.relays[22]]))
-        self.Edges.append(self.nodes[20].addEdge(self.nodes[23], "to", "IND_B2L3_CURRENT", [self.relays[23]]))
-        self.Edges.append(self.nodes[20].addEdge(self.nodes[24], "to", "IND_B2L4_CURRENT", [self.relays[24]]))
-        self.Edges.append(self.nodes[20].addEdge(self.nodes[25], "to", "IND_B2L5_CURRENT", [self.relays[25]]))             
-        self.Edges.append(self.nodes[26].addEdge(self.nodes[27], "to", "RES_BUS1_CURRENT", [self.relays[27]]))
-        self.Edges.append(self.nodes[26].addEdge(self.nodes[33], "to", "RES_BUS2_CURRENT", [self.relays[33]]))
-        self.Edges.append(self.nodes[26].addEdge(self.nodes[39], "to", "RES_BUS3_CURRENT", [self.relays[39]]))
-        self.Edges.append(self.nodes[26].addEdge(self.nodes[45], "to", "RES_BUS4_CURRENT", [self.relays[45]]))
-        self.Edges.append(self.nodes[27].addEdge(self.nodes[28], "to", "RES_B1L1_CURRENT", [self.relays[28]]))
-        self.Edges.append(self.nodes[26].addEdge(self.nodes[33], "to", "RES_BUS2_CURRENT", [self.relays[33]]))
-        self.Edges.append(self.nodes[26].addEdge(self.nodes[39], "to", "RES_BUS3_CURRENT", [self.relays[39]]))
-        self.Edges.append(self.nodes[26].addEdge(self.nodes[45], "to", "RES_BUS4_CURRENT", [self.relays[45]]))
-        self.Edges.append(self.nodes[27].addEdge(self.nodes[28], "to", "RES_B1L1_CURRENT", [self.relays[28]]))
-        self.Edges.append(self.nodes[27].addEdge(self.nodes[29], "to", "RES_B1L2_CURRENT", [self.relays[29]]))
-        self.Edges.append(self.nodes[27].addEdge(self.nodes[30], "to", "RES_B1L3_CURRENT", [self.relays[30]]))
-        self.Edges.append(self.nodes[27].addEdge(self.nodes[31], "to", "RES_B1L4_CURRENT", [self.relays[31]]))
-        self.Edges.append(self.nodes[27].addEdge(self.nodes[32], "to", "RES_B1L5_CURRENT", [self.relays[32]]))
-        self.Edges.append(self.nodes[33].addEdge(self.nodes[34], "to", "RES_B2L1_CURRENT", [self.relays[34]]))
-        self.Edges.append(self.nodes[33].addEdge(self.nodes[35], "to", "RES_B2L2_CURRENT", [self.relays[35]]))
-        self.Edges.append(self.nodes[33].addEdge(self.nodes[36], "to", "RES_B2L3_CURRENT", [self.relays[36]]))
-        self.Edges.append(self.nodes[33].addEdge(self.nodes[37], "to", "RES_B2L4_CURRENT", [self.relays[37]]))
-        self.Edges.append(self.nodes[33].addEdge(self.nodes[38], "to", "RES_B2L5_CURRENT", [self.relays[38]]))
-        self.Edges.append(self.nodes[39].addEdge(self.nodes[40], "to", "RES_B3L1_CURRENT", [self.relays[40]]))
-        self.Edges.append(self.nodes[39].addEdge(self.nodes[41], "to", "RES_B3L2_CURRENT", [self.relays[41]]))
-        self.Edges.append(self.nodes[39].addEdge(self.nodes[42], "to", "RES_B3L3_CURRENT", [self.relays[42]]))
-        self.Edges.append(self.nodes[39].addEdge(self.nodes[43], "to", "RES_B3L4_CURRENT", [self.relays[43]]))
-        self.Edges.append(self.nodes[39].addEdge(self.nodes[44], "to", "RES_B3L5_CURRENT", [self.relays[44]]))
-        self.Edges.append(self.nodes[45].addEdge(self.nodes[46], "to", "RES_B4L1_CURRENT", [self.relays[46]]))
-        self.Edges.append(self.nodes[45].addEdge(self.nodes[47], "to", "RES_B4L2_CURRENT", [self.relays[47]]))
-        self.Edges.append(self.nodes[45].addEdge(self.nodes[48], "to", "RES_B4L3_CURRENT", [self.relays[48]]))
-        self.Edges.append(self.nodes[45].addEdge(self.nodes[49], "to", "RES_B4L4_CURRENT", [self.relays[49]]))
-        self.Edges.append(self.nodes[45].addEdge(self.nodes[50], "to", "RES_B4L5_CURRENT", [self.relays[50]]))
+        self.Edges.append(self.nodes[0].addEdge(self.nodes[1], "to", "COM_MAIN_CURRENT", [self.relays[1]]))
+        self.Edges.append(self.nodes[0].addEdge(self.nodes[14], "to", "IND_MAIN_CURRENT", [self.relays[14]]))
+        self.Edges.append(self.nodes[0].addEdge(self.nodes[27], "to", "RES_MAIN_CURRENT", [self.relays[27]]))
+        self.Edges.append(self.nodes[1].addEdge(self.nodes[2], "to", "COM_BUS1_CURRENT", [self.relays[2]]))
+        self.Edges.append(self.nodes[1].addEdge(self.nodes[8], "to", "COM_BUS2_CURRENT", [self.relays[8]]))
+        self.Edges.append(self.nodes[2].addEdge(self.nodes[3], "to", "COM_B1L1_CURRENT", [self.relays[3]]))              
+        self.Edges.append(self.nodes[2].addEdge(self.nodes[4], "to", "COM_B1L2_CURRENT", [self.relays[4]]))
+        self.Edges.append(self.nodes[2].addEdge(self.nodes[5], "to", "COM_B1L3_CURRENT", [self.relays[5]]))              
+        self.Edges.append(self.nodes[2].addEdge(self.nodes[6], "to", "COM_B1L4_CURRENT", [self.relays[6]]))              
+        self.Edges.append(self.nodes[2].addEdge(self.nodes[7], "to", "COM_B1L5_CURRENT", [self.relays[7]]))
+        self.Edges.append(self.nodes[8].addEdge(self.nodes[9], "to", "COM_B2L1_CURRENT", [self.relays[9]]))                                                        
+        self.Edges.append(self.nodes[8].addEdge(self.nodes[10], "to", "COM_B2L2_CURRENT", [self.relays[10]]))
+        self.Edges.append(self.nodes[8].addEdge(self.nodes[11], "to", "COM_B2L3_CURRENT", [self.relays[11]]))
+        self.Edges.append(self.nodes[8].addEdge(self.nodes[12], "to", "COM_B2L4_CURRENT", [self.relays[12]]))
+        self.Edges.append(self.nodes[8].addEdge(self.nodes[13], "to", "COM_B2L5_CURRENT", [self.relays[13]]))
+        self.Edges.append(self.nodes[14].addEdge(self.nodes[15], "to", "IND_BUS1_CURRENT", [self.relays[15]]))
+        self.Edges.append(self.nodes[14].addEdge(self.nodes[21], "to", "IND_BUS2_CURRENT", [self.relays[21]]))
+        self.Edges.append(self.nodes[15].addEdge(self.nodes[16], "to", "IND_B1L1_CURRENT", [self.relays[16]]))
+        self.Edges.append(self.nodes[15].addEdge(self.nodes[17], "to", "IND_B1L2_CURRENT", [self.relays[17]]))
+        self.Edges.append(self.nodes[15].addEdge(self.nodes[18], "to", "IND_B1L3_CURRENT", [self.relays[18]]))
+        self.Edges.append(self.nodes[15].addEdge(self.nodes[19], "to", "IND_B1L4_CURRENT", [self.relays[19]]))
+        self.Edges.append(self.nodes[15].addEdge(self.nodes[20], "to", "IND_B1L5_CURRENT", [self.relays[20]]))
+        self.Edges.append(self.nodes[21].addEdge(self.nodes[22], "to", "IND_B2L1_CURRENT", [self.relays[22]]))
+        self.Edges.append(self.nodes[21].addEdge(self.nodes[23], "to", "IND_B2L2_CURRENT", [self.relays[23]]))
+        self.Edges.append(self.nodes[21].addEdge(self.nodes[24], "to", "IND_B2L3_CURRENT", [self.relays[24]]))
+        self.Edges.append(self.nodes[21].addEdge(self.nodes[25], "to", "IND_B2L4_CURRENT", [self.relays[25]]))
+        self.Edges.append(self.nodes[21].addEdge(self.nodes[26], "to", "IND_B2L5_CURRENT", [self.relays[26]]))             
+        self.Edges.append(self.nodes[27].addEdge(self.nodes[28], "to", "RES_BUS1_CURRENT", [self.relays[28]]))
+        self.Edges.append(self.nodes[27].addEdge(self.nodes[34], "to", "RES_BUS2_CURRENT", [self.relays[34]]))
+        self.Edges.append(self.nodes[27].addEdge(self.nodes[40], "to", "RES_BUS3_CURRENT", [self.relays[40]]))
+        self.Edges.append(self.nodes[27].addEdge(self.nodes[46], "to", "RES_BUS4_CURRENT", [self.relays[46]]))
+        self.Edges.append(self.nodes[28].addEdge(self.nodes[29], "to", "RES_B1L1_CURRENT", [self.relays[29]]))
+        self.Edges.append(self.nodes[28].addEdge(self.nodes[30], "to", "RES_B1L2_CURRENT", [self.relays[30]]))
+        self.Edges.append(self.nodes[28].addEdge(self.nodes[31], "to", "RES_B1L3_CURRENT", [self.relays[31]]))
+        self.Edges.append(self.nodes[28].addEdge(self.nodes[32], "to", "RES_B1L4_CURRENT", [self.relays[32]]))
+        self.Edges.append(self.nodes[28].addEdge(self.nodes[33], "to", "RES_B1L5_CURRENT", [self.relays[33]]))
+        self.Edges.append(self.nodes[34].addEdge(self.nodes[35], "to", "RES_B2L1_CURRENT", [self.relays[35]]))
+        self.Edges.append(self.nodes[34].addEdge(self.nodes[36], "to", "RES_B2L2_CURRENT", [self.relays[36]]))
+        self.Edges.append(self.nodes[34].addEdge(self.nodes[37], "to", "RES_B2L3_CURRENT", [self.relays[37]]))
+        self.Edges.append(self.nodes[34].addEdge(self.nodes[38], "to", "RES_B2L4_CURRENT", [self.relays[38]]))
+        self.Edges.append(self.nodes[34].addEdge(self.nodes[39], "to", "RES_B2L5_CURRENT", [self.relays[39]]))
+        self.Edges.append(self.nodes[40].addEdge(self.nodes[41], "to", "RES_B3L1_CURRENT", [self.relays[41]]))
+        self.Edges.append(self.nodes[40].addEdge(self.nodes[42], "to", "RES_B3L2_CURRENT", [self.relays[42]]))
+        self.Edges.append(self.nodes[40].addEdge(self.nodes[43], "to", "RES_B3L3_CURRENT", [self.relays[43]]))
+        self.Edges.append(self.nodes[40].addEdge(self.nodes[44], "to", "RES_B3L4_CURRENT", [self.relays[44]]))
+        self.Edges.append(self.nodes[40].addEdge(self.nodes[45], "to", "RES_B3L5_CURRENT", [self.relays[45]]))
+        self.Edges.append(self.nodes[46].addEdge(self.nodes[47], "to", "RES_B4L1_CURRENT", [self.relays[47]]))
+        self.Edges.append(self.nodes[46].addEdge(self.nodes[48], "to", "RES_B4L2_CURRENT", [self.relays[48]]))
+        self.Edges.append(self.nodes[46].addEdge(self.nodes[49], "to", "RES_B4L3_CURRENT", [self.relays[49]]))
+        self.Edges.append(self.nodes[46].addEdge(self.nodes[50], "to", "RES_B4L4_CURRENT", [self.relays[50]]))
+        self.Edges.append(self.nodes[46].addEdge(self.nodes[51], "to", "RES_B4L5_CURRENT", [self.relays[51]]))
 
         self.connMatrix = [[0 for x in range(len(self.nodes))] for y in range(len(self.nodes))]
         
@@ -432,6 +434,7 @@ class UtilityAgent(Agent):
         self.relays[48].closeRelay()
         self.relays[49].closeRelay()
         self.relays[50].closeRelay()
+        self.relays[51].closeRelay()
         
        
         
@@ -1138,30 +1141,12 @@ class UtilityAgent(Agent):
                     self.dbupdatebid(bid,self.dbconn,self.t0)
                     
             totaldemand = 0        
-            #notify the counterparties of the terms on which they will consume power
             for bid in self.demandBidList:
                 #look up customer object corresponding to bid
                 cust = listparse.lookUpByName(bid.counterparty,self.customers)
                 if bid.accepted:
                     totaldemand += bid.amount
-                    bid.rate = group.rate
-                                        
-                    self.sendBidAcceptance(bid, group.rate)
-                    #update bid's entry in database
-                    self.dbupdatebid(bid,self.dbconn,self.t0)
-                        
-                    #self.NextPeriod.plan.addConsumption(bid)
-                    self.NextPeriod.demandbidmanager.readybids.append(bid)
-                        
-                    #give customer permission to connect
-                    cust.permission = True                    
                     
-                else:
-                    self.sendBidRejection(bid, group.rate)
-                    #update bid's entry in database
-                    self.dbupdatebid(bid,self.dbconn,self.t0)
-                    #customer does not have permission to connect
-                    cust.permission = False
             
             self.reserveBidList.sort(key = operator.attrgetter("rate"))
             totalreserve = 0
@@ -1282,6 +1267,30 @@ class UtilityAgent(Agent):
                     
             self.bidstate.reserveonly()
             
+            #notify the counterparties of the terms on which they will consume power
+            for bid in self.demandBidList:
+                #look up customer object corresponding to bid
+                cust = listparse.lookUpByName(bid.counterparty,self.customers)
+                if bid.accepted:
+                    totaldemand += bid.amount
+                    bid.rate = group.rate
+                                        
+                    self.sendBidAcceptance(bid, group.rate)
+                    #update bid's entry in database
+                    self.dbupdatebid(bid,self.dbconn,self.t0)
+                        
+                    #self.NextPeriod.plan.addConsumption(bid)
+                    self.NextPeriod.demandbidmanager.readybids.append(bid)
+                        
+                    #give customer permission to connect
+                    cust.permission = True                    
+                    
+                else:
+                    self.sendBidRejection(bid, group.rate)
+                    #update bid's entry in database
+                    self.dbupdatebid(bid,self.dbconn,self.t0)
+                    #customer does not have permission to connect
+                    cust.permission = False
                                    
             #announce rates for next period
             for cust in group.customers:
@@ -1822,7 +1831,7 @@ class UtilityAgent(Agent):
                 self.FaultTag = "{branch}_{bus}_{load}_FAULT".format(branch = branch, bus = bus, load = load)
                 print(self.FaultTag)
             faultcondition = tagClient.readTags([self.FaultTag], "scenario")
-            print("node condition:{iso}".format(iso=node.isolated))    
+            print("fault condition:{iso}".format(iso=node.isolated))    
             if faultcondition == 1:
                 print("{node} has ground fault, need to isolate this node".format(node = node.name))
                 #self.dbrelayfault(location,faultcondition,self.dbconn,self.t0)
@@ -1832,14 +1841,14 @@ class UtilityAgent(Agent):
                     node.isolateNode()
                     
                     node.isolated = True
-                    print("node condition:{iso}".format(iso=node.isolated))
+                    print("fault condition:{iso}".format(iso=node.isolated))
                 elif node.isolated == True:
                     print("node has already been isolated")
             else:
                 print("No faults detected in {me}!".format(me = node.name))
         for relay in self.relays:
             relay.printInfo()
-                
+    '''            
         nominal = True        
         #look for brownouts
         for node in self.nodes:
@@ -1894,7 +1903,7 @@ class UtilityAgent(Agent):
             if settings.DEBUGGING_LEVEL >= 2:
                 print("No faults detected by {me}!".format(me = self.name))
     
-    '''@Core.periodic(settings.SECONDARY_VOLTAGE_INTERVAL)
+    @Core.periodic(settings.SECONDARY_VOLTAGE_INTERVAL)
     def voltageMonitor(self):
         for group in self.groupList:
             for node in group.nodes:

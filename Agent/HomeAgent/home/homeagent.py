@@ -124,6 +124,7 @@ class HomeAgent(Agent):
         for app in self.Appliances:
             #add appliance to database
             self.dbnewappliance(app,self.dbconn,self.t0)
+            print("we now have appliance: {app}".format(app=app))
             
         self.dbsafe = True
             
@@ -439,6 +440,7 @@ class HomeAgent(Agent):
                         if plan.optimalcontrol:
                             print("has opt control")
                             comps = plan.optimalcontrol.components
+                            print("optimalcontrol components:{comps}".format(comps=comps))
                             for app in self.Appliances:
                                 if app.name in comps:
                                     if settings.DEBUGGING_LEVEL >= 2:

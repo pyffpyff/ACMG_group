@@ -242,7 +242,7 @@ class Disposition(object):
         self.period = period
         self.components = {}
         
-        self.closeRelay = False
+        self.closeRelay = False #True #######False!!!!!!!!!!
         
         
     def printInfo(self,depth = 1):
@@ -385,11 +385,11 @@ class BidManager(object):
         mode = biddict.get("service",None)
         self.movePendingToAccepted(bid)
         
-#         if bid.resourceName:
-#             self.period.disposition.components[bid.resourceName] = DeviceDisposition(bid.resourceName,bid.amount,mode)
-#         else:
-#             if bid.side == "demand":
-#                 self.period.disposition.closeRelay = True
+        if bid.resourceName:
+            self.period.disposition.components[bid.resourceName] = DeviceDisposition(bid.resourceName,bid.amount,mode)
+        else:
+            if bid.side == "demand":
+                self.period.disposition.closeRelay = True
         
     def bidRejected(self,bid):
         self.movePendingToRejected(bid)
