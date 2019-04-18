@@ -69,6 +69,7 @@ class CustomerProfile(object):
         
     def connectCustomer(self):
         tagClient.writeTags([self.relayTag],[True],"load")
+        print("connect customer")
         
     def measureVoltage(self):
         tag = self.voltageTag

@@ -1234,8 +1234,9 @@ class HomeAgent(Agent):
         #operate main relay
         if period.disposition.closeRelay:
             self.connectLoad()
-            if settings.DEBUGGING_LEVEL >= 2:
-                print("HOMEOWNER {me} connecting load in period {per}".format(me = self.name, per = period.periodNumber))
+            print("connect load")
+            
+                        
         else:
             self.disconnectLoad()
         

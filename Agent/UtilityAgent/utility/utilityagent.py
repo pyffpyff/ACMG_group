@@ -1482,7 +1482,7 @@ class UtilityAgent(Agent):
                         for relay in self.relays:
                             if relay.tagName == relayname:
                                 relay.openRelay()
-                                print("open relay {relayname} for disconnected resource {res}".format(relayname = relayname, res=bid.resourceName))
+                                print("open relay {relayname} for disconnected resource {res}".format(relayname = relayname, res=res.name))
                      
                     
                         if settings.DEBUGGING_LEVEL >= 2:
@@ -1558,7 +1558,7 @@ class UtilityAgent(Agent):
                                     if relay.tagName == relayname:
                                         relay.closeRelay()
                                         print("close relay {relayname} for connected resource {res}".format(relayname = relayname, res=bid.resourceName))
-                            elem.connected == True
+                            elem.connected = True
                             print("battery connection: {con}".format(con = elem.connected))
                             involvedResources.append(elem)
                         else:
