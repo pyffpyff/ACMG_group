@@ -920,8 +920,8 @@ class HomeAgent(Agent):
                     for input in plan.admissiblecontrols:
                         self.findInputCost(state,input,plan,settings.ST_PLAN_INTERVAL,debug)
                         if input.pathcost < currentbest:
-                            if debug:
-                                print(">NEW BEST OPTION! {newcost} < {oldcost}".format(newcost = input.pathcost, oldcost = currentbest))
+                            #if debug:
+                            #    print(">NEW BEST OPTION! {newcost} < {oldcost}".format(newcost = input.pathcost, oldcost = currentbest))
                             currentbest = input.pathcost
                             #associate state with optimal input
                             state.setoptimalinput(input)
@@ -930,11 +930,11 @@ class HomeAgent(Agent):
                         #        print(">NO BETTER: {newcost} >= {oldcost}".format(newcost = input.pathcost, oldcost = currentbest))
                     
                     
-                    if debug:
-                        print(">HOMEOWNER {me}: optimal input for state {sta} is {inp}".format(me = self.name, sta = state.components, inp = state.optimalinput.components))
+                    #if debug:
+                    #    print(">HOMEOWNER {me}: optimal input for state {sta} is {inp}".format(me = self.name, sta = state.components, inp = state.optimalinput.components))
                 else:
                     if debug:
-                        print(">HOMEOWNER {me}: this is the final period in the window".format(me = self.name))
+                        #print(">HOMEOWNER {me}: this is the final period in the window".format(me = self.name))
                         state.printInfo()
             
             selperiod = selperiod.previousperiod
@@ -972,8 +972,8 @@ class HomeAgent(Agent):
     def findInputCost(self,state,input,plan,duration,debug = False):
         period = plan.period
         
-        if debug:
-            print(">>HOMEOWNER {me}: finding cost for input {inp}".format(me = self.name, inp = input.components))
+        #if debug:
+        #    print(">>HOMEOWNER {me}: finding cost for input {inp}".format(me = self.name, inp = input.components))
         #find next state if this input is applied
         comps = self.applySimulatedInput(state,input,duration,False)
         
@@ -997,9 +997,9 @@ class HomeAgent(Agent):
             totaltrans += dev.inputCostFn(input.components[key],period.nextperiod,state,duration)
         input.pathcost = pathcost + totaltrans
         
-        if debug:
-            print(">>HOMEOWNER {me}: transition to state: {sta}".format(me = self.name, sta = comps))
-            print(">>HOMEOWNER {me}: transition cost is {trans}, total path cost is {path}".format(me = self.name, trans = totaltrans, path = input.pathcost))
+        #if debug:
+        #    print(">>HOMEOWNER {me}: transition to state: {sta}".format(me = self.name, sta = comps))
+        #    print(">>HOMEOWNER {me}: transition cost is {trans}, total path cost is {path}".format(me = self.name, trans = totaltrans, path = input.pathcost))
         
         return input.pathcost
     

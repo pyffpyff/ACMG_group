@@ -1288,6 +1288,11 @@ class UtilityAgent(Agent):
                     self.sendBidRejection(bid,group.rate)
                 #update bid's entry in database
                 self.dbupdatebid(bid,self.dbconn,self.t0)
+                #give customer permission to connect if resource is co-located
+                cust = listparse.lookUpByName(bid.counterparty,self.customers)
+                if cust:
+                    if res.location == cust.location:
+                        cust.permission = True
                     
             self.bidstate.reserveonly()
             
@@ -1300,6 +1305,7 @@ class UtilityAgent(Agent):
                     bid.rate = group.rate
                                         
                     self.sendBidAcceptance(bid, group.rate)
+                    print("send demand bid acceptance")
                     #update bid's entry in database
                     self.dbupdatebid(bid,self.dbconn,self.t0)
                         
@@ -1307,7 +1313,8 @@ class UtilityAgent(Agent):
                     self.NextPeriod.demandbidmanager.readybids.append(bid)
                         
                     #give customer permission to connect
-                    cust.permission = True                    
+                    cust.permission = True 
+                    print("customer {cus} get permission".format(cus = cust.name))                   
                     
                 else:
                     self.sendBidRejection(bid, group.rate)
@@ -1356,10 +1363,12 @@ class UtilityAgent(Agent):
             self.CurrentPeriod.printInfo(0)
         
         #call enactPlan
+        print("now start enact this period plan")
         self.enactPlan()
         
         #solicit bids for next period, this function schedules a delayed function call to process
         #the bids it has solicited
+        print("now start solicit bids for next period")
         self.solicitBids()
                 
         #schedule next advancePeriod call
@@ -1427,12 +1436,28 @@ class UtilityAgent(Agent):
                             elif bid.service == "reserve":
                                 #res.DischargeChannel.ramp(.1)            
                                 #res.DischargeChannel.changeReserve(bid.amount,-.2)
-                                print("res.name: {name}".format(name = res.name))
-                                
-                                res.setDisposition(bid.amount,-0.2)
-                                grouprate = bid.rate
+                                while bid.amount > 0:
+                                    setpointamount = SOC - bid.amount
+                                    print("SOC is : {soc}, bid amount is : {ba}, set point amount is: {spa}".format(soc = SOC, ba = bid.amount, spa = setpointamount))
+                                    for Res in self.Resources:
+                                        if type(Res) == resource.LeadAcidBattery:
+                                            state = Res.statebehaviorcheck(SOC,bid.amount)
+                                    if state == True:
+                                        res.setSOC(setpointamount)
+                                        grouprate = bid.rate
+                                        break
+                                    else:
+                                        bid.amount -= 0.01
+                                bid.service = "power"
+                                self.dbupdatebid(bid,self.dbconn,self.t0)
+                                print("now bid service is: {ser}".format(ser=bid.service))
                                 if settings.DEBUGGING_LEVEL >= 2:
-                                    print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
+                                    print("Committed resource {rname} as a reserve with setpoint: {amt}".format(rname = res.name, amt = bid.amount))
+                            
+                            #    res.setDisposition(bid.amount,-0.2)
+                            #    grouprate = bid.rate
+                            #    if settings.DEBUGGING_LEVEL >= 2:
+                            #        print("Reserve resource {rname} setpoint to {amt}".format(rname = res.name, amt = bid.amount))
                         #if the resource isn't connected, connect it and ramp up power
                         else:
                             if bid.service == "power":

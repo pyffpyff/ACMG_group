@@ -66,10 +66,13 @@ class CustomerProfile(object):
             
     def disconnectCustomer(self):
         tagClient.writeTags([self.relayTag],[False],"load")
+        print("disconnect customer")
+        print("relay {relaytag} status: {status}".format(relaytag = self.relayTag, status = tagClient.readTags([self.relayTag],"load")))
         
     def connectCustomer(self):
         tagClient.writeTags([self.relayTag],[True],"load")
         print("connect customer")
+        print("relay {relaytag} status: {status}".format(relaytag = self.relayTag, status = tagClient.readTags([self.relayTag],"load")))
         
     def measureVoltage(self):
         tag = self.voltageTag

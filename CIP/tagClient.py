@@ -23,7 +23,7 @@ def writeTags(names,values,plc):
     #    print(message)
         sock.sendall(message)
         
-        data = sock.recv(1024)
+        data = sock.recv(2048)
         #print("\nWRITE @ {dt} \nMESSAGE: {mes}  REC: {dat}".format(dt = datetime.isoformat(datetime.now()), mes = message, dat = data))
         
         #flog = open("~/volttron/taglog","a+")
