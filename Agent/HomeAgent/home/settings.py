@@ -3,7 +3,7 @@
 DEBUGGING_LEVEL = 2
 
 
-ST_PLAN_INTERVAL = 45
+ST_PLAN_INTERVAL = 25
 
 #time step for simulated appliances
 SIMSTEP_INTERVAL = 5

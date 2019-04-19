@@ -908,12 +908,12 @@ class HomeAgent(Agent):
             for state in plan.stategrid.grid:
                 #if this is not the last period
                 if selperiod.nextperiod:
-                    if debug:
-                        print(">WORKING ON A NEW STATE: {sta}".format(sta = state.components))
+                    #if debug:
+                    #    print(">WORKING ON A NEW STATE: {sta}".format(sta = state.components))
                     #make inputs for the state currently being examined
                     self.makeInputs(state,plan,debug)
-                    if debug:
-                        print(">EVALUATING {n} ACTIONS".format(n = len(plan.admissiblecontrols)))
+                    #if debug:
+                    #    print(">EVALUATING {n} ACTIONS".format(n = len(plan.admissiblecontrols)))
                     
                     #find the best input for this state
                     currentbest = float('inf')
@@ -1057,8 +1057,8 @@ class HomeAgent(Agent):
         #non grid connected inputs
         #do this later... needs special consideration
         
-        if debug:
-            print("HOMEOWNER {me} made input list for period {per} with {num} points".format(me = self.name, per = period.periodNumber, num = len(inputs)))
+        #if debug:
+        #    print("HOMEOWNER {me} made input list for period {per} with {num} points".format(me = self.name, per = period.periodNumber, num = len(inputs)))
 
         
         plan.setAdmissibleInputs(inputs)

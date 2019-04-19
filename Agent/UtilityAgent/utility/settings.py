@@ -21,7 +21,7 @@ FAULT_DETECTION_INTERVAL = 10
 DR_SOLICITATION_INTERVAL = 30
 
 #time between customer solicitation messages in seconds
-CUSTOMER_SOLICITATION_INTERVAL = 20
+CUSTOMER_SOLICITATION_INTERVAL = 5
 
 #time between account credit/debit routine runs in seconds
 ACCOUNTING_INTERVAL = 5

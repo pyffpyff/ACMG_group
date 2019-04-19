@@ -485,7 +485,7 @@ class UtilityAgent(Agent):
         if settings.DEBUGGING_LEVEL >= 2:
             print("UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
 
-    @Core.periodic(20)
+    @Core.periodic(10)
     def getNowcast(self):
         mesdict = {}
         mesdict["message_sender"] = self.name
@@ -2312,6 +2312,14 @@ class UtilityAgent(Agent):
                 #dbupdatebid()
             else:
                 print("UTILITY {me} RECEIVED AN UNSUPPORTED MESSAGE TYPE: {msg} ON THE energymarket TOPIC".format(me = self.name, msg = messageSubject))
+            #ask for topology again after receiving market feed message
+            subs = self.getTopology()
+            self.printInfo(2)
+            if settings.DEBUGGING_LEVEL >= 2:
+                print("UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
+        
+            self.announceTopology()
+        
                 
     '''callback for demandresponse topic'''
     def DRfeed(self, peer, sender, bus, topic, headers, message):
