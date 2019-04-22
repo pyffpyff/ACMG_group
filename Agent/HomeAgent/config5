@@ -1,0 +1,47 @@
+{
+	"agentid": "home5",
+	"name": "home5",
+	"location": "AC.COM.BUS1.LOAD2",
+	"message": "home agent up",
+	"FREGpart" : 0,
+	"DRpart" : 0,
+	"refload" : 0.6,
+	"windowlength" : 2,
+	"resources": [],
+	"appliances": 
+	[
+		{
+			"type": "light", 
+			"owner": "home5",
+			"name":"light2",
+			"nominalpower":0.6
+		}
+	],
+	"preference_manager":
+	{
+		"selection_rule":
+		{
+			"type":"fixed",
+			"params":{}
+		},
+		"behavior_sets":
+		[
+			[
+				{
+					"name":"light2",
+					"devicenames":["light2"],
+					"costfn":
+					{
+						"type":"piecewise",
+						"params":
+						{
+							"values":[2.7, -2.7],
+							"bounds":[0.5]
+						}
+					}
+				}
+			]
+		]
+	}
+	
+}

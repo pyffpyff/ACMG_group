@@ -1,0 +1,68 @@
+{
+	"agentid": "home6",
+	"name": "home6",
+	"location": "AC.RES.BUS4.LOAD1",
+	"message": "home agent up",
+	"FREGpart" : 0,
+	"DRpart" : 1,
+	"refload" : 1.2,
+	"windowlength" : 8,
+	"resources": [],
+	"appliances": 
+	[
+		{
+			"type":"heater",
+			"owner":"home6",
+			"name":"heater3",
+			"specificheatcapacity":4.184,
+			"mass":4.4,
+			"thermalresistance":35.0,
+			"nominalpower":1.2,
+			"deltat":10.0,
+			"inittemp":33.0
+		}
+	],
+	"preference_manager":
+	{
+		"selection_rule":
+		{
+			"type":"repeating_sets",
+            "params":{"periods":[[0,1,2,3,4,5,6,7,8,9,10],[11,12,13,14,15,16,17,18,19,20,21,22,23]]}
+		},
+		"behavior_sets":
+		[
+			[
+				{
+					"name":"heater3",
+					"devicenames":["heater3"],
+					"costfn":
+					{
+						"type":"quad",
+						"params":
+						{
+							"a":1350.0,
+							"b":-5.0,
+							"c":0.75
+						}
+					}
+				}
+			],
+			[
+				{
+					"name":"heater3",
+					"devicenames":["heater3"],
+					"costfn":
+					{
+						"type":"quad",
+						"params":
+						{
+							"a":1300.0,
+							"b":-8.5,
+							"c":0.8
+						}
+					}
+				}
+			]
+		]
+	}
+}

@@ -2,7 +2,7 @@
 	"agentid": "utility",
 	"name": "utility1",
 	"message": "utility agent starting up",
-	"resources": [{"type":"ACresource", "owner":"utility1", "location": "AC.COM.MAIN.MAIN", "name":"ACresource", "capCost":100, "amortization_period":10, "maxDischargePower":2.2,"dischargeChannel":1,"fuel_cost":0.02},
+	"resources": [{"type":"ACresource", "owner":"utility1", "location": "AC.COM.MAIN.MAIN", "name":"ACresource", "capCost":100, "amortization_period":10, "maxDischargePower":4,"dischargeChannel":1,"fuel_cost":0.02},
 				{"type":"LeadAcidBattery", "owner":"utility1", "location":"AC.RES.BUS2.LOAD5","name":"Battery","capCost":0, "maxDischargePower":1.0,"dischargeChannel":2,"maxChargePower":1.0,"capacity": 50,"chargeChannel":2}
 				
 	
