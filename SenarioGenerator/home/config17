@@ -1,0 +1,47 @@
+{
+	"agentid": "home17",
+	"name": "home17",
+	"location": "AC.COM.BUS2.LOAD1",
+	"message": "home agent up",
+	"FREGpart" : 0,
+	"DRpart" : 0,
+	"refload" : 0.1,
+	"windowlength" : 2,
+	"resources": [],
+	"appliances": 
+	[
+		{
+			"type": "light", 
+			"owner": "home17",
+			"name":"light17",
+			"nominalpower":0.1
+		}
+	],
+	"preference_manager":
+	{
+		"selection_rule":
+		{
+			"type":"fixed",
+			"params":{}
+		},
+		"behavior_sets":
+		[
+			[
+				{
+					"name":"light17",
+					"devicenames":["light17"],
+					"costfn":
+					{
+						"type":"piecewise",
+						"params":
+						{
+							"values":[2.7, -2.7],
+							"bounds":[0.5]
+						}
+					}
+				}
+			]
+		]
+	}
+	
+}

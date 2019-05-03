@@ -382,6 +382,61 @@ class UtilityAgent(Agent):
         
         self.initnode()
         
+        self.powerfactorTag = "powerfactor" 
+        self.TotalVoltageList = ["MAIN_VOLTAGE","COM_MAIN_VOLTAGE","IND_MAIN_VOLTAGE","RES_MAIN_VOLTAGE"]
+        self.TotalCurrentList = [   "MAIN_CURRENT",
+                                    "COM_MAIN_CURRENT",
+                                    "COM_BUS1_CURRENT",
+                                    "COM_B1L1_CURRENT",
+                                    "COM_B1L2_CURRENT",
+                                    "COM_B1L3_CURRENT",
+                                    "COM_B1L4_CURRENT",
+                                    "COM_B1L5_CURRENT",
+                                    "COM_BUS2_CURRENT",
+                                    "COM_B2L1_CURRENT",
+                                    "COM_B2L2_CURRENT",
+                                    "COM_B2L3_CURRENT",
+                                    "COM_B2L4_CURRENT",
+                                    "COM_B2L5_CURRENT",
+                                    "IND_MAIN_CURRENT",
+                                    "IND_BUS1_CURRENT",
+                                    "IND_B1L1_CURRENT",
+                                    "IND_B1L2_CURRENT",
+                                    "IND_B1L3_CURRENT",
+                                    "IND_B1L4_CURRENT",
+                                    "IND_B1L5_CURRENT",
+                                    "IND_BUS2_CURRENT",
+                                    "IND_B2L1_CURRENT",
+                                    "IND_B2L2_CURRENT",
+                                    "IND_B2L3_CURRENT",
+                                    "IND_B2L4_CURRENT",
+                                    "IND_B2L5_CURRENT",
+                                    "RES_MAIN_CURRENT",
+                                    "RES_BUS1_CURRENT",
+                                    "RES_B1L1_CURRENT",
+                                    "RES_B1L2_CURRENT",
+                                    "RES_B1L3_CURRENT",
+                                    "RES_B1L4_CURRENT",
+                                    "RES_B1L5_CURRENT",
+                                    "RES_BUS2_CURRENT",
+                                    "RES_B2L1_CURRENT",
+                                    "RES_B2L2_CURRENT",
+                                    "RES_B2L3_CURRENT",
+                                    "RES_B2L4_CURRENT",
+                                    "RES_B2L5_CURRENT",
+                                    "RES_BUS3_CURRENT",
+                                    "RES_B3L1_CURRENT",
+                                    "RES_B3L2_CURRENT",
+                                    "RES_B3L3_CURRENT",
+                                    "RES_B3L4_CURRENT",
+                                    "RES_B3L5_CURRENT",
+                                    "RES_BUS4_CURRENT",
+                                    "RES_B4L1_CURRENT",
+                                    "RES_B4L2_CURRENT",
+                                    "RES_B4L3_CURRENT",
+                                    "RES_B4L4_CURRENT",
+                                    "RES_B4L5_CURRENT"]
+        
     def initnode(self):
         self.relays[0].closeRelay()
         self.relays[1].closeRelay()
@@ -704,13 +759,26 @@ class UtilityAgent(Agent):
                     else:
                         print("TEMP-DEBUG: can't find owner {own} for {res}".format(own = res.owner, res = res.name))
 
-             
-    
-    
-    
-    
-    
-    
+        print("current and voltage in period {num}:".format(num = self.CurrentPeriod.periodNumber))  
+        for index in range(len(self.TotalCurrentList)):
+        #    print("it is normal?")
+            name = self.TotalCurrentList[index]
+            value = tagClient.readTags([self.TotalCurrentList[index]],"load")
+            print("{tag}: {value}".format(tag = name,value = value))
+            
+
+#        print("{tag}: {value}".format(tag = "MAIN_VOLTAGE",value = tagClient.readTags(["MAIN_VOLTAGE"],"load")))
+        print("{tag}: {value}".format(tag = "COM_MAIN_VOLTAGE",value = tagClient.readTags(["COM_MAIN_VOLTAGE"],"load")))
+        print("{tag}: {value}".format(tag = "IND_MAIN_VOLTAGE",value = tagClient.readTags(["IND_MAIN_VOLTAGE"],"load")))
+        print("{tag}: {value}".format(tag = "RES_MAIN_VOLTAGE",value = tagClient.readTags(["RES_MAIN_VOLTAGE"],"load")))
+                    
+#        for number in range(len(self.TotalVoltageList)):
+#            name = self.TotalVoltageList[number]
+#            value = tagClient.readTags([self.TotalVoltageList[number]],"load")
+#            print("{tag}: {value}".format(tag = name,value = value))
+        print("{tag}: {value}".format(tag = self.powerfactorTag,value = tagClient.readTags([self.powerfactorTag],"load")))
+     
+   
     
     @Core.periodic(settings.LT_PLAN_INTERVAL)
     def planLongTerm(self):

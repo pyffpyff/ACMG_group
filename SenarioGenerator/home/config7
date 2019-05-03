@@ -1,0 +1,45 @@
+{"agentid": "home7",
+	"name": "home7",
+	"location": "AC.RES.BUS1.LOAD2",
+	"message": "home agent up",
+	"FREGpart" : 0,
+	"DRpart" : 0,
+	"refload" : 0.1,
+	"windowlength" : 2,
+	"resources": [],
+	"appliances": 
+	[
+		{
+			"type": "light", 
+			"owner": "home7",
+			"name":"light7",
+			"nominalpower":0.1
+		}
+	],
+	"preference_manager":
+	{
+		"selection_rule":
+		{
+			"type":"fixed",
+			"params":{}
+		},
+		"behavior_sets":
+		[
+			[
+				{
+					"name":"light7",
+					"devicenames":["light7"],
+					"costfn":
+					{
+						"type":"piecewise",
+						"params":
+						{
+							"values":[3.6,-3.6],
+							"bounds":[0.5]
+						}
+					}
+				}
+			]
+		]
+	}
+}

@@ -24,7 +24,7 @@ DR_SOLICITATION_INTERVAL = 30
 CUSTOMER_SOLICITATION_INTERVAL = 5
 
 #time between account credit/debit routine runs in seconds
-ACCOUNTING_INTERVAL = 5
+ACCOUNTING_INTERVAL = 15
 
 #currently unused
 RESERVE_DISPATCH_INTERVAL = 5

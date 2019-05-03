@@ -23,7 +23,7 @@ def writeTags(names,values,plc):
     #    print(message)
         sock.sendall(message)
         
-        data = sock.recv(2048)
+        data = sock.recv(4096)
         #print("\nWRITE @ {dt} \nMESSAGE: {mes}  REC: {dat}".format(dt = datetime.isoformat(datetime.now()), mes = message, dat = data))
         
         #flog = open("~/volttron/taglog","a+")
@@ -56,7 +56,7 @@ def readTags(names, plc):
    #     print("already install message")
         sock.sendall(message)
    #     print("already send message")
-        data = sock.recv(1024)
+        data = sock.recv(4096)
    #     print("data receive")
         #print("\nREAD @ {dt} \nMESSAGE: {mes}  REC: {dat}".format(dt = datetime.isoformat(datetime.now()), mes = message, dat = data))
             

@@ -1,19 +1,20 @@
-{"agentid": "home1",
-	"name": "home1",
-	"location": "AC.RES.BUS1.LOAD2",
+{
+	"agentid": "home5",
+	"name": "home5",
+	"location": "AC.COM.BUS1.LOAD2",
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.4,
+	"refload" : 0.1,
 	"windowlength" : 2,
 	"resources": [],
 	"appliances": 
 	[
 		{
 			"type": "light", 
-			"owner": "home1",
-			"name":"light1",
-			"nominalpower":0.4
+			"owner": "home5",
+			"name":"light2",
+			"nominalpower":0.1
 		}
 	],
 	"preference_manager":
@@ -27,14 +28,14 @@
 		[
 			[
 				{
-					"name":"light1",
-					"devicenames":["light1"],
+					"name":"light2",
+					"devicenames":["light2"],
 					"costfn":
 					{
 						"type":"piecewise",
 						"params":
 						{
-							"values":[3.6,-3.6],
+							"values":[2.7, -2.7],
 							"bounds":[0.5]
 						}
 					}
@@ -42,4 +43,5 @@
 			]
 		]
 	}
+	
 }
