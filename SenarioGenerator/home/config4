@@ -15,11 +15,11 @@
 			"owner":"home4",
 			"name":"heater2",
 			"specificheatcapacity":4.184,
-			"mass":4.4,
-			"thermalresistance":35.0,
+			"mass":3.6,
+			"thermalresistance":36.0,
 			"nominalpower":0.5,
 			"deltat":10.0,
-			"inittemp":33.0
+			"inittemp":33.5
 		}
 	],
 	"preference_manager":
@@ -57,7 +57,7 @@
 						"type":"quad",
 						"params":
 						{
-							"a":1350.0,
+							"a":1280.0,
 							"b":-8.0,
 							"c":0.75
 							

@@ -114,9 +114,11 @@ class HomeAgent(Agent):
         
         #register exit function
         atexit.register(self.exit_handler,self.dbconn)
-
-        self.Appliances.extend(appliances.makeAppliancesFromList(self.appliances))
         
+        print("self.appliance:")
+        print(self.appliances)
+        self.Appliances.extend(appliances.makeAppliancesFromList(self.appliances))
+        print("make an appliance")
         #make preference manager object from configuration file
         self.Preferences = human.PreferenceManager(**self.preferences)
         self.Preferences.printInfo()

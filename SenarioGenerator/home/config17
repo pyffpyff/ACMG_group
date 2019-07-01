@@ -1,12 +1,12 @@
 {
 	"agentid": "home17",
 	"name": "home17",
-	"location": "AC.COM.BUS2.LOAD1",
+	"location": "AC.IND.BUS2.LOAD1",
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
 	"refload" : 0.1,
-	"windowlength" : 2,
+	"windowlength" : 5,
 	"resources": [],
 	"appliances": 
 	[

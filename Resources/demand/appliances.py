@@ -483,6 +483,7 @@ def makeAppliancesFromList(applist, debug = True):
             
 def makeAppliance(appdict,debug = False):
     apptype = appdict.get("type",None)
+#    print("makeappliance from type")
     if apptype == "heater":
         newapp = HeatingElement(**appdict)
     elif apptype == "refrigerator":

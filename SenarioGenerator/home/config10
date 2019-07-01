@@ -4,16 +4,23 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.1,
-	"windowlength" : 2,
+	"refload" : 0.4,
+	"windowlength" : 4,
 	"resources": [],
 	"appliances": 
 	[
 		{
-			"type": "light", 
-			"owner": "home10",
-			"name":"light10",
-			"nominalpower":0.1
+			
+			"type": "heater",
+			"owner":"home10",
+			"name":"heater4",
+			"specificheatcapacity":4.184,
+			"mass":2.5,
+			"thermalresistance":30.0,
+			"maxsetpoint":40.0,
+			"nominalpower":0.4,
+			"deltat":10.0,
+			"inittemp":36.5
 		}
 	],
 	"preference_manager":
@@ -27,15 +34,16 @@
 		[
 			[
 				{
-					"name":"light10",
-					"devicenames":["light10"],
+					"name":"heater4",
+					"devicenames":["heater4"],
 					"costfn":
 					{
-						"type":"piecewise",
+						"type":"quad",
 						"params":
 						{
-							"values":[3.6,-3.6],
-							"bounds":[0.5]
+							"a":1260.0,
+							"b":-7.0,
+							"c":0.74
 						}
 					}
 				}

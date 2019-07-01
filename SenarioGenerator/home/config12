@@ -4,16 +4,23 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.1,
-	"windowlength" : 2,
+	"refload" : 0.8,
+	"windowlength" : 6,
 	"resources": [],
 	"appliances": 
 	[
 		{
-			"type": "light", 
-			"owner": "home12",
-			"name":"light12",
-			"nominalpower":0.1
+			
+			"type": "heater",
+			"owner":"home12",
+			"name":"heater5",
+			"specificheatcapacity":4.184,
+			"mass":3.0,
+			"thermalresistance":32.0,
+			"maxsetpoint":40.0,
+			"nominalpower":0.8,
+			"deltat":10.0,
+			"inittemp":36.0
 		}
 	],
 	"preference_manager":
@@ -27,15 +34,16 @@
 		[
 			[
 				{
-					"name":"light12",
-					"devicenames":["light12"],
+					"name":"heater5",
+					"devicenames":["heater5"],
 					"costfn":
 					{
-						"type":"piecewise",
+						"type":"quad",
 						"params":
 						{
-							"values":[3.6,-3.6],
-							"bounds":[0.5]
+							"a":1270.0,
+							"b":-7.0,
+							"c":0.85
 						}
 					}
 				}

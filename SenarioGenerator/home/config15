@@ -5,16 +5,23 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.1,
-	"windowlength" : 2,
+	"refload" : 0.6,
+	"windowlength" : 5,
 	"resources": [],
 	"appliances": 
 	[
 		{
-			"type": "light", 
-			"owner": "home15",
-			"name":"light15",
-			"nominalpower":0.1
+			
+			"type": "heater",
+			"owner":"home15",
+			"name":"heater6",
+			"specificheatcapacity":4.184,
+			"mass":2.8,
+			"thermalresistance":26.0,
+			"maxsetpoint":40.0,
+			"nominalpower":0.6,
+			"deltat":10.0,
+			"inittemp":37.0
 		}
 	],
 	"preference_manager":
@@ -28,18 +35,17 @@
 		[
 			[
 				{
-					"name":"light15",
-					"devicenames":["light15"],
+					"name":"heater6",
+					"devicenames":["heater6"],
 					"costfn":
 					{
 						"type":"piecewise",
 						"params":
 						{
-							"values":[2.7, -2.7],
-							"bounds":[0.5]
+							"values":[2.3,-1],
+							"bounds":[0.4]
 						}
 					}
-				}
 			]
 		]
 	}
