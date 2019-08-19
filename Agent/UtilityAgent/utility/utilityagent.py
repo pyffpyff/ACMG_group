@@ -1978,6 +1978,7 @@ class UtilityAgent(Agent):
     def faultDetector(self):
         if settings.DEBUGGING_LEVEL >= 2:
             print("running fault detection subroutine")
+        faultnode = None
         for node in self.nodes:
             location = node.name
             localist = location.split('.')
@@ -1997,6 +1998,8 @@ class UtilityAgent(Agent):
                 #self.dbrelayfault(location,faultcondition,self.dbconn,self.t0)
                 if node.isolated == False:
                     
+                    faultnode = node
+                    
                     print("isolate this node")
                     node.isolateNode()
                     
@@ -2008,6 +2011,18 @@ class UtilityAgent(Agent):
                 print("No faults detected in {me}!".format(me = node.name))
         for relay in self.relays:
             relay.printInfo()
+            
+        #then reconnect the distributed resources
+        if faultnode:
+            for res in self.Resources:
+                
+                if type(res) is resource.LeadAcidBattery:
+                    if (res.location != faultnode.name):
+                        res.location = faultnode.name
+                        
+             
+                            
+            
     '''            
         nominal = True        
         #look for brownouts
