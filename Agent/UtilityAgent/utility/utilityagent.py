@@ -350,17 +350,32 @@ class UtilityAgent(Agent):
 
         self.connMatrix = [[0 for x in range(len(self.nodes))] for y in range(len(self.nodes))]
         
-       
+        self.initnode()
+        
         #import list of utility resources and make into object
         resource.makeResource(self.resources,self.Resources,False)
         for res in self.Resources:
+            resloc =  res.location
+            loclist = resloc.split('.')
+            if type(loclist) is list:
+                type, branch, bus, load = loclist
+                resloc = bus + load
+            
             for node in self.nodes:
               if (res.location == node.name):
                  
                  node.addResource(res)
             self.dbnewresource(res,self.dbconn,self.t0)
-        
- 
+           
+            for relays in self.relays:
+                relayname = relays.tagName
+                relbranch = relays.branch
+                relload = relays.bus
+                if relbranch == branch and relload == resloc :
+                    relays.closeRelay()
+                    print("close relay {relay}".format(relay = relays.tagName))
+                    
+          
                 
         self.perceivedInsol = .75 #per unit
         self.customers = []
@@ -380,7 +395,7 @@ class UtilityAgent(Agent):
         self.CurrentPeriod.printInfo(0)
         self.NextPeriod.printInfo(0)
         
-        self.initnode()
+        
         
         self.powerfactorTag = "powerfactor" 
         self.TotalVoltageList = ["MAIN_VOLTAGE","COM_MAIN_VOLTAGE","IND_MAIN_VOLTAGE","RES_MAIN_VOLTAGE"]
@@ -2011,6 +2026,16 @@ class UtilityAgent(Agent):
                 print("No faults detected in {me}!".format(me = node.name))
         for relay in self.relays:
             relay.printInfo()
+        
+        #find if a new subgroup is needed
+        '''if faultnode:
+            loclist = faultnode.name.split('.')
+            if type(loclist) is list:
+                ac, type, bus, load = loclist
+                if load == "MAIN":
+                    
+                 
+        '''
             
         #then reconnect the distributed resources
         if faultnode:
