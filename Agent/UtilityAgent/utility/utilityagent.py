@@ -355,11 +355,11 @@ class UtilityAgent(Agent):
         #import list of utility resources and make into object
         resource.makeResource(self.resources,self.Resources,False)
         for res in self.Resources:
-            resloc =  res.location
-            loclist = resloc.split('.')
-            if type(loclist) is list:
-                type, branch, bus, load = loclist
-                resloc = bus + load
+ #           resloc =  res.location
+ #           loclist = resloc.split('.')
+ #           if type(loclist) is list:
+ #               style, branch, bus, load = loclist
+ #               resloc = bus + load
             
             for node in self.nodes:
               if (res.location == node.name):
@@ -367,13 +367,13 @@ class UtilityAgent(Agent):
                  node.addResource(res)
             self.dbnewresource(res,self.dbconn,self.t0)
            
-            for relays in self.relays:
-                relayname = relays.tagName
-                relbranch = relays.branch
-                relload = relays.bus
-                if relbranch == branch and relload == resloc :
-                    relays.closeRelay()
-                    print("close relay {relay}".format(relay = relays.tagName))
+ #           for relays in self.relays:
+ #               relayname = relays.tagName
+ #               relbranch = relays.branch
+ #               relload = relays.bus
+ #               if relbranch == branch and relload == resloc :
+ #                   relays.closeRelay()
+ #                   print("close relay {relay}".format(relay = relays.tagName))
                     
           
                 
