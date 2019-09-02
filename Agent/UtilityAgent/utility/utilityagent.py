@@ -365,6 +365,7 @@ class UtilityAgent(Agent):
               if (res.location == node.name):
                  
                  node.addResource(res)
+                 
             self.dbnewresource(res,self.dbconn,self.t0)
            
  #           for relays in self.relays:
@@ -1447,8 +1448,14 @@ class UtilityAgent(Agent):
         
         #call enactPlan
         print("now start enact this period plan")
+        print("-------test test-------")
         self.enactPlan()
+        subs = self.getTopology()
+        self.printInfo(2)
         
+        self.announceTopology()
+      
+        print("-------test test-------")
         #solicit bids for next period, this function schedules a delayed function call to process
         #the bids it has solicited
         print("now start solicit bids for next period")
@@ -1491,16 +1498,22 @@ class UtilityAgent(Agent):
                     bid.printInfo(0)
                     res = listparse.lookUpByName(bid.resourceName,self.Resources)
                     location = res.location
-                    loclist = location.split('.')
-                    grid, branch, bus, load = loclist
-                    if load == "MAIN":
-                        relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
-                    else:
-                        relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
-                    for relay in self.relays:
-                        if relay.tagName == relayname:
-                            relay.closeRelay()
-                            print("close relay {relayname} for connected resource {res}".format(relayname = relayname, res=bid.resourceName))
+                    
+                    for node in self.nodes:
+                        if node.name == res.location:
+                            node.connectNode()
+                            print("connectNode {nodename} to connected resource {res}".format(nodename = node.name, res=res.name))
+                    
+             #       loclist = location.split('.')
+             #       grid, branch, bus, load = loclist
+             #       if load == "MAIN":
+             #           relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
+             #       else:
+             #           relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
+             #       for relay in self.relays:
+             #           if relay.tagName == relayname:
+             #               relay.closeRelay()
+             #               print("close relay {relayname} for connected resource {res}".format(relayname = relayname, res=bid.resourceName))
                                
                     if res is not None:
                         involvedResources.append(res)
@@ -1581,16 +1594,24 @@ class UtilityAgent(Agent):
                         res.DischargeChannel.disconnect()
                         res.connected = False
                         location = res.location
-                        loclist = location.split('.')
-                        grid, branch, bus, load = loclist
-                        if load == "MAIN":
-                            relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
-                        else:
-                            relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
-                        for relay in self.relays:
-                            if relay.tagName == relayname:
-                                relay.openRelay()
-                                print("open relay {relayname} for disconnected resource {res}".format(relayname = relayname, res=res.name))
+                        
+                        for node in self.nodes:
+                            if node.name == res.location:
+                                node.isolateNode()
+                                print("disconnectNode {nodename} for disconnected resource {res}".format(nodename = node.name, res=res.name))
+                    
+                        
+                        
+    #                    loclist = location.split('.')
+    #                    grid, branch, bus, load = loclist
+    #                    if load == "MAIN":
+    #                        relayname = "{branch}_{bus}_USER".format(branch = branch, bus = bus, load = load)
+    #                    else:
+    #                        relayname = "{branch}_{bus}{load}_USER".format(branch = branch, bus = bus, load = load)
+    #                    for relay in self.relays:
+    #                        if relay.tagName == relayname:
+    #                            relay.openRelay()
+    #                            print("open relay {relayname} for disconnected resource {res}".format(relayname = relayname, res=res.name))
                      
                     
                         if settings.DEBUGGING_LEVEL >= 2:

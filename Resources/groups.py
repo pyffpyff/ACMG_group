@@ -263,7 +263,15 @@ class Node(BaseNode):
             #then, open the relays
             
      #       edge.openRelays()
-        
+    
+    def connectNode(self):
+        for edge in self.edges:
+            for relay in  edge.relays:
+                #first, record the state we were in before
+        #        self.savedstate[relay] = relay.closed
+                relay.closeRelay()
+                print("connect this node and close relay")
+         
             
     def restore(self):
         for edge in self.edges:
