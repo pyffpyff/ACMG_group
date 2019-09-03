@@ -2433,7 +2433,7 @@ class UtilityAgent(Agent):
         
         return subs
      
-    def faultRebuild(matrix, faultnode): 
+    def faultRebuild(self, matrix, faultnode): 
         dim = len(matrix)
         location = faultnode.name
         print("rebuild topology under fault node {fn}".format(fn = faultnode.name))
@@ -2455,28 +2455,36 @@ class UtilityAgent(Agent):
                 while len(unexamined) > 0:
                     group = []
                     expandlist.append(unexamined[0])
-                    for i in range(num):
-                        if i not in expandlist and i in unexamined:
-                                expandlist.append(i)
-                    unexamined.remove(row)
-                    expandlist.remove(row)
-                    group.append(row)
-                groups.append(group)
-            
+                    while len(expandlist) > 0:
+                        row = expandlist[0]
+                        for i in range(num):
+                            if matrix[row][i] == 1 or matrix[row][i] == 0:
+                                if i not in expandlist and i in unexamined:
+                                        expandlist.append(i)
+                        unexamined.remove(row)
+                        expandlist.remove(row)
+                        group.append(row)
+                    groups.append(group)
+                print("build group one")
             if g == 1:
                 left = dim - num -1
-                unexamined = range(0,left)
+                unexamined = range(num + 1,dim)
                 while len(unexamined) > 0:
                     group = []
                     expandlist.append(unexamined[0])
-                    for i in range(left):
-                        if i not in expandlist and i in unexamined:
-                                expandlist.append(i)
-                    unexamined.remove(row)
-                    expandlist.remove(row)
-                    group.append(row)
-                groups.append(group)
-        
+                    while len(expandlist) > 0:
+                        row = expandlist[0]
+                        for i in range(num + 1,dim):
+                            if matrix[row][i] == 1 or matrix[row][i] == 0:
+                                if i not in expandlist and i in unexamined:
+                                        expandlist.append(i)
+                        unexamined.remove(row)
+                        expandlist.remove(row)
+                        group.append(row)
+                    groups.append(group)
+                print("build group two")
+            print("-----test test-----")
+            print(groups)
         return groups
     
         
