@@ -15,7 +15,7 @@ def findDisjointSubgraphs(matrix):
             for i in range(dim):
 #                if matrix[row][i] == 0:
 #                    sub += 0;
-                if matrix[row][i] == 1 or matrix[row][i] == 0:# : and row != i
+                if matrix[row][i] == 1 or matrix[row][i] == 0:# and row != i: #
 #                    sub += 1;
                     if i not in expandlist and i in unexamined:
                         expandlist.append(i)

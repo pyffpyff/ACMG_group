@@ -697,7 +697,16 @@ class UtilityAgent(Agent):
                 #look up customer object by name
                 cust = listparse.lookUpByName(messageSender,self.customers)
                 if cust.permission:
-                    cust.connectCustomer()     
+                    cust.connectCustomer()  
+                    
+                              
+                    for node in self.nodes:
+                        if node.name == cust.location:
+                            node.connectNode()
+                            print("connectNode {nodename} to connected customer {cust}".format(nodename = node.name, cust = cust.name))
+                        
+       
+                       
                     if settings.DEBUGGING_LEVEL >= 2:
                         print("{me} GRANTING CONNECTION REQUEST. {their} MAY CONNECT IN PERIOD {per}".format(me = self.name, their = messageSender, per = self.CurrentPeriod.periodNumber))
                 else:
@@ -1448,14 +1457,14 @@ class UtilityAgent(Agent):
         
         #call enactPlan
         print("now start enact this period plan")
-        print("-------test test-------")
-        self.enactPlan()
-        subs = self.getTopology()
-        self.printInfo(2)
+     #   print("-------test test-------")
+     #   self.enactPlan()
+     #   subs = self.getTopology()
+     #   self.printInfo(2)
         
-        self.announceTopology()
+     #   self.announceTopology()
       
-        print("-------test test-------")
+     #   print("-------test test-------")
         #solicit bids for next period, this function schedules a delayed function call to process
         #the bids it has solicited
         print("now start solicit bids for next period")
@@ -2049,6 +2058,7 @@ class UtilityAgent(Agent):
             relay.printInfo()
         
         #find if a new subgroup is needed
+        
         '''if faultnode:
             loclist = faultnode.name.split('.')
             if type(loclist) is list:
@@ -2057,7 +2067,12 @@ class UtilityAgent(Agent):
                     
                  
         '''
-            
+        #update topology
+        if faultnode:
+            subs = self.updateTopology(faultnode)
+            self.printInfo(2)
+            self.announceTopology()
+                
         #then reconnect the distributed resources
         if faultnode:
             for res in self.Resources:
@@ -2392,6 +2407,78 @@ class UtilityAgent(Agent):
         if settings.DEBUGGING_LEVEL >= 2:
             print("UTILITY {me} HAS FINISHED REBUILDING CONNECTIVITY MATRIX".format(me = self.name))
             print("{mat}".format(mat = self.connMatrix))
+     
+    '''update agent's knowledge of the current grid topology after fault detection'''
+    def updateTopology(self, faultnode):
+        self.rebuildConnMatrix()
+        
+    #    subs = graph.findDisjointSubgraphs(self.connMatrix) ??? how to separate a subgroup after fault ???
+        subs = self.faultRebuild(self.connMatrix, faultnode)
+        
+        if len(subs) >= 1:
+            del self.groupList[:]
+            for i in range(1,len(subs)+1):
+                #create a new group class for each disjoint subgraph
+                self.groupList.append(groups.Group("group{i}".format(i = i),[],[],[]))
+            for index,sub in enumerate(subs):
+                #for concision
+                cGroup = self.groupList[index]
+                for node in sub:
+                    cNode = self.nodes[node]
+                    cGroup.addNode(cNode)
+        else:
+            print("got a weird number of disjoint subgraphs in utilityagent.getTopology()")
+            
+        self.dbtopo(str(subs),self.dbconn,self.t0)
+        
+        return subs
+     
+    def faultRebuild(matrix, faultnode): 
+        dim = len(matrix)
+        location = faultnode.name
+        print("rebuild topology under fault node {fn}".format(fn = faultnode.name))
+        groups = []
+        group = []
+        expandlist = []
+        num = 0
+        
+        for node in self.nodes:
+            if node.name == faultnode.name:
+                break
+            else:
+                num = num + 1
+        print("number of fault node is : {num}".format(num = num))
+                
+        for g in range (2):
+            if g == 0:
+                unexamined = range(num)
+                while len(unexamined) > 0:
+                    group = []
+                    expandlist.append(unexamined[0])
+                    for i in range(num):
+                        if i not in expandlist and i in unexamined:
+                                expandlist.append(i)
+                    unexamined.remove(row)
+                    expandlist.remove(row)
+                    group.append(row)
+                groups.append(group)
+            
+            if g == 1:
+                left = dim - num -1
+                unexamined = range(0,left)
+                while len(unexamined) > 0:
+                    group = []
+                    expandlist.append(unexamined[0])
+                    for i in range(left):
+                        if i not in expandlist and i in unexamined:
+                                expandlist.append(i)
+                    unexamined.remove(row)
+                    expandlist.remove(row)
+                    group.append(row)
+                groups.append(group)
+        
+        return groups
+    
         
     def marketfeed(self, peer, sender, bus, topic, headers, message):
         print("TEMP DEBUG - UTILITY: {mes}".format(mes = message))
