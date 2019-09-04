@@ -552,10 +552,17 @@ class UtilityAgent(Agent):
         sched = datetime.now() + timedelta(seconds = 11)
         self.core.schedule(sched,self.sendBidSolicitation)
         
-        subs = self.getTopology()
+        
+        faultnode = self.faultDetector()
+        if faultnode:
+            subs = self.updateTopology(faultnode)
+        else:
+            subs = self.getTopology()
         if settings.DEBUGGING_LEVEL >= 2:
-            print("UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
-
+            print("for setup, UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
+            
+        
+        
     @Core.periodic(10)
     def getNowcast(self):
         mesdict = {}
@@ -839,11 +846,15 @@ class UtilityAgent(Agent):
 
      #solicit bids for the next period
     def solicitBids(self):
- #       subs = self.faultDetector()
-        subs = self.getTopology()
-        self.printInfo(2)
+        faultnode = self.faultDetector()
+#        subs = self.getTopology()
+        if faultnode:
+            subs = self.updateTopology(faultnode)
+        else:
+            subs = self.getTopology()
+#        self.printInfo(2)
         if settings.DEBUGGING_LEVEL >= 2:
-            print("UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
+            print("for bid solicitation, UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
         
         self.announceTopology()
         
@@ -869,7 +880,8 @@ class UtilityAgent(Agent):
         
         self.bidstate.acceptall()
         for group in self.groupList:
-            #group.printInfo()
+            print("---send bid solicitation---")
+            group.printInfo()
             for cust in group.customers:
                 #cust.printInfo()
                 # ask about consumption
@@ -972,6 +984,7 @@ class UtilityAgent(Agent):
             #??how to get total power of every load 
             maxLoad = 0
             for bid in self.demandBidList:
+                
                 maxLoad += bid.amount
             print("maxLoad:{maxLoad}".format(maxLoad = maxLoad))  
             maxSupply = 0
@@ -2042,10 +2055,10 @@ class UtilityAgent(Agent):
             if faultcondition == 1:
                 print("{node} has ground fault, need to isolate this node".format(node = node.name))
                 #self.dbrelayfault(location,faultcondition,self.dbconn,self.t0)
+                faultnode = node
                 if node.isolated == False:
                     
-                    faultnode = node
-                    
+                                       
                     print("isolate this node")
                     node.isolateNode()
                     
@@ -2084,7 +2097,7 @@ class UtilityAgent(Agent):
                         
             
                             
-            
+        return faultnode        
     '''            
         nominal = True        
         #look for brownouts
@@ -2415,7 +2428,7 @@ class UtilityAgent(Agent):
         
     #    subs = graph.findDisjointSubgraphs(self.connMatrix) ??? how to separate a subgroup after fault ???
         subs = self.faultRebuild(self.connMatrix, faultnode)
-        
+        print("grouplist contains following parameters: {subs}".format(subs = subs))
         if len(subs) >= 1:
             del self.groupList[:]
             for i in range(1,len(subs)+1):
@@ -2484,6 +2497,7 @@ class UtilityAgent(Agent):
                         expandlist.remove(row)
                         group.append(row)
                     groups.append(group)
+                    
         #        print("build group two")
         #    print("-----test test-----")
         #    print(groups)
@@ -2539,13 +2553,18 @@ class UtilityAgent(Agent):
             else:
                 print("UTILITY {me} RECEIVED AN UNSUPPORTED MESSAGE TYPE: {msg} ON THE energymarket TOPIC".format(me = self.name, msg = messageSubject))
             #ask for topology again after receiving market feed message
-            subs = self.getTopology()
+            faultnode = self.faultDetector()
+            if faultnode:
+                subs = self.updateTopology(faultnode)
+            else:
+                subs = self.getTopology()
             self.printInfo(2)
             if settings.DEBUGGING_LEVEL >= 2:
-                print("UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
-        
+                print("for market feed, UTILITY {me} THINKS THE TOPOLOGY IS {top}".format(me = self.name, top = subs))
+            
             self.announceTopology()
-        
+            
+            
                 
     '''callback for demandresponse topic'''
     def DRfeed(self, peer, sender, bus, topic, headers, message):
