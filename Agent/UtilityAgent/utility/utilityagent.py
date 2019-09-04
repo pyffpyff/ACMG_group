@@ -839,7 +839,7 @@ class UtilityAgent(Agent):
 
      #solicit bids for the next period
     def solicitBids(self):
-        
+ #       subs = self.faultDetector()
         subs = self.getTopology()
         self.printInfo(2)
         if settings.DEBUGGING_LEVEL >= 2:
@@ -968,6 +968,7 @@ class UtilityAgent(Agent):
             
             
         for group in self.groupList:
+            print("this is bid solicitaion for group {num}".format(num = group.name))
             #??how to get total power of every load 
             maxLoad = 0
             for bid in self.demandBidList:
@@ -2081,7 +2082,7 @@ class UtilityAgent(Agent):
                     if (res.location != faultnode.name):
                         res.location = faultnode.name
                         
-             
+            
                             
             
     '''            
@@ -2430,7 +2431,8 @@ class UtilityAgent(Agent):
             print("got a weird number of disjoint subgraphs in utilityagent.getTopology()")
             
         self.dbtopo(str(subs),self.dbconn,self.t0)
-        
+        print("-----test test-----")
+        print(subs)
         return subs
      
     def faultRebuild(self, matrix, faultnode): 
@@ -2465,7 +2467,7 @@ class UtilityAgent(Agent):
                         expandlist.remove(row)
                         group.append(row)
                     groups.append(group)
-                print("build group one")
+        #        print("build group one")
             if g == 1:
                 left = dim - num -1
                 unexamined = range(num + 1,dim)
@@ -2482,9 +2484,9 @@ class UtilityAgent(Agent):
                         expandlist.remove(row)
                         group.append(row)
                     groups.append(group)
-                print("build group two")
-            print("-----test test-----")
-            print(groups)
+        #        print("build group two")
+        #    print("-----test test-----")
+        #    print(groups)
         return groups
     
         

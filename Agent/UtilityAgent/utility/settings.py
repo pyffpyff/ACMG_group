@@ -15,7 +15,7 @@ BID_SUBMISSION_INTERVAL = 30
 SWITCH_FAULT_INTERVAL = 50
 
 #time between fault detection routine runs in seconds
-FAULT_DETECTION_INTERVAL = 20
+FAULT_DETECTION_INTERVAL = 10
 
 #time between DR enrollment solicitation messages in seconds
 DR_SOLICITATION_INTERVAL = 30
