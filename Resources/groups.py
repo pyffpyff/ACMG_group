@@ -18,6 +18,10 @@ class Group(object):
         self.nodeprioritylist = []
         self.loadprioritylist = []
         
+        self.demandBidList = []
+        self.supplyBidList = []
+        self.reserveBidList = []
+        
     def rebuildpriorities(self):
         self.nodeprioritylist = []
         self.loadprioritylist = []

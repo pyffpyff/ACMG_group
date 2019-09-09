@@ -653,6 +653,9 @@ class UtilityAgent(Agent):
                                 
                                 if node.group:
                                     node.group.customers.append(cust)
+                                    print("-----test test-----")
+                                    print("group {num} contains following customers: {cus}".format(num = node.group.name, cus = messageSender))
+        
                         
                         for resource in resources:
                             print("NEW RESOURCE: {res}".format(res = resource))
@@ -930,6 +933,33 @@ class UtilityAgent(Agent):
                     if settings.DEBUGGING_LEVEL >= 2:
                         print("UTILITY {me} SOLICITING RESERVE POWER BIDS FROM {them}".format(me = self.name, them = cust.name))
 
+    #determines whether the bid belongs in the auction for the group
+    def bidforgroup(self,bid,group):
+        print("group is {group}".format(group = group.name))
+        print(group.resources)
+        print(group.customers)
+        print(group.nodes)
+        if bid.resourceName:
+            #if the bid is for a specific device, we are interested in the location of the device
+            name = bid.resourceName
+            print("bid's resource is: {reso}".format(reso = name))            
+            for res in group.resources:
+                if name == res.name:
+                    print("resource's name is: {rname}".format(rname = res.name))
+                    return True
+        
+        else:
+            #otherwise, we are interested in the membership of the home
+            name = bid.counterparty
+            print("bid's counterparty is: {cou}".format(cou = name))
+            for cust in group.customers:
+                if name == cust.name:
+                    print("customer's name is: {cname}".format(cname = cust.name))
+                    return True
+                
+        return False
+        
+
     def planShortTerm(self):
         if settings.DEBUGGING_LEVEL >= 2:
             print("\nUTILITY {me} IS FORMING A NEW SHORT TERM PLAN FOR PERIOD {per}".format(me = self.name,per = self.NextPeriod.periodNumber))
@@ -964,7 +994,7 @@ class UtilityAgent(Agent):
             
             elif type(res) is resource.LeadAcidBattery:
                 amount = res.SOC
-                print("batter totally have {am} power".format(am = amount))
+                print("battery totally have {am} power".format(am = amount))
 #                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
                 rate = 0.01*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
@@ -984,12 +1014,19 @@ class UtilityAgent(Agent):
             #??how to get total power of every load 
             maxLoad = 0
             for bid in self.demandBidList:
-                
-                maxLoad += bid.amount
+                print("this is demand bid: {db} ".format(db = bid.counterparty))
+                if self.bidforgroup(bid,group):
+                    print("bid is in this group")
+                    group.demandBidList.append(bid)
+                    maxLoad += bid.amount
             print("maxLoad:{maxLoad}".format(maxLoad = maxLoad))  
             maxSupply = 0
             for bid in self.supplyBidList:
-                maxSupply += bid.amount
+                print("this is supply bid: {sb} ".format(sb = bid.counterparty))
+                if self.bidforgroup(bid, group):
+                    print("bid is in this group")
+                    group.supplyBidList.append(bid)
+                    maxSupply += bid.amount
             print("maxSupply:{maxSupply}".format(maxSupply = maxSupply))    
             reserveneed = 0
             if maxLoad > maxSupply:
@@ -2434,6 +2471,7 @@ class UtilityAgent(Agent):
             for i in range(1,len(subs)+1):
                 #create a new group class for each disjoint subgraph
                 self.groupList.append(groups.Group("group{i}".format(i = i),[],[],[]))
+            
             for index,sub in enumerate(subs):
                 #for concision
                 cGroup = self.groupList[index]
@@ -2444,8 +2482,6 @@ class UtilityAgent(Agent):
             print("got a weird number of disjoint subgraphs in utilityagent.getTopology()")
             
         self.dbtopo(str(subs),self.dbconn,self.t0)
-        print("-----test test-----")
-        print(subs)
         return subs
      
     def faultRebuild(self, matrix, faultnode): 
@@ -2480,7 +2516,9 @@ class UtilityAgent(Agent):
                         expandlist.remove(row)
                         group.append(row)
                     groups.append(group)
-        #        print("build group one")
+                print("build group one")
+            #    print(groups.name)
+            #    print(group.customers)
             if g == 1:
                 left = dim - num -1
                 unexamined = range(num + 1,dim)
@@ -2497,10 +2535,13 @@ class UtilityAgent(Agent):
                         expandlist.remove(row)
                         group.append(row)
                     groups.append(group)
-                    
-        #        print("build group two")
+                print("build group two")
+            #    print(groups.name)
+            #    print(group.customers)
+                   
+                
         #    print("-----test test-----")
-        #    print(groups)
+            print("groups:{groups}".format(groups = groups) )  
         return groups
     
         
