@@ -935,26 +935,28 @@ class UtilityAgent(Agent):
 
     #determines whether the bid belongs in the auction for the group
     def bidforgroup(self,bid,group):
-        print("group is {group}".format(group = group.name))
-        print(group.resources)
-        print(group.customers)
-        print(group.nodes)
+     #   print("group is {group}".format(group = group.name))
+        for resource in group.resources:
+            print(resource.name)
+        for customer in group.customers:
+            print(customer.name)
+       
         if bid.resourceName:
             #if the bid is for a specific device, we are interested in the location of the device
             name = bid.resourceName
-            print("bid's resource is: {reso}".format(reso = name))            
+        #    print("bid's resource is: {reso}".format(reso = name))            
             for res in group.resources:
                 if name == res.name:
-                    print("resource's name is: {rname}".format(rname = res.name))
+         #           print("resource's name is: {rname}".format(rname = res.name))
                     return True
         
         else:
             #otherwise, we are interested in the membership of the home
             name = bid.counterparty
-            print("bid's counterparty is: {cou}".format(cou = name))
+        #    print("bid's counterparty is: {cou}".format(cou = name))
             for cust in group.customers:
                 if name == cust.name:
-                    print("customer's name is: {cname}".format(cname = cust.name))
+         #           print("customer's name is: {cname}".format(cname = cust.name))
                     return True
                 
         return False
@@ -1010,43 +1012,53 @@ class UtilityAgent(Agent):
             
             
         for group in self.groupList:
+            group.demandBidList = []
+            group.supplyBidList = []
             print("this is bid solicitaion for group {num}".format(num = group.name))
             #??how to get total power of every load 
             maxLoad = 0
             for bid in self.demandBidList:
-                print("this is demand bid: {db} ".format(db = bid.counterparty))
+            #    print("this is demand bid: {db} ".format(db = bid.counterparty))
                 if self.bidforgroup(bid,group):
-                    print("bid is in this group")
+             #       print("bid is in this group")
                     group.demandBidList.append(bid)
                     maxLoad += bid.amount
             print("maxLoad:{maxLoad}".format(maxLoad = maxLoad))  
             maxSupply = 0
             for bid in self.supplyBidList:
-                print("this is supply bid: {sb} ".format(sb = bid.counterparty))
+            #    print("this is supply bid: {sb} ".format(sb = bid.counterparty))
                 if self.bidforgroup(bid, group):
-                    print("bid is in this group")
+            #        print("bid is in this group")
                     group.supplyBidList.append(bid)
                     maxSupply += bid.amount
             print("maxSupply:{maxSupply}".format(maxSupply = maxSupply))    
+            for bid in self.reserveBidList:
+            #    print("this is reserve bid: {sb} ".format(sb = bid.resourceName))
+                if len(self.groupList)>1:
+                    if group.name == "group2":
+            #        print("bid is in this group")
+                        group.reserveBidList.append(bid)
+                else:
+                        group.reserveBidList.append(bid)
             reserveneed = 0
             if maxLoad > maxSupply:
                 reserveneed = 1
             
             #sort array of supplier bids by rate from low to high
-            self.supplyBidList.sort(key = operator.attrgetter("rate"))
+            group.supplyBidList.sort(key = operator.attrgetter("rate"))
             #sort array of consumer bids by rate from high to low
-            self.demandBidList.sort(key = operator.attrgetter("rate"),reverse = True)
+            group.demandBidList.sort(key = operator.attrgetter("rate"),reverse = True)
                    
             if settings.DEBUGGING_LEVEL >= 2:
                 print("\n\nPLANNING for GROUP {group} for PERIOD {per}: worst case load is {max}".format(group = group.name, per = self.NextPeriod.periodNumber, max = maxLoad))
                 print(">>here are the supply bids:")
-                for bid in self.supplyBidList:                    
+                for bid in group.supplyBidList:                    
                     bid.printInfo(0)
                 print(">>here are the reserve bids:")
-                for bid in self.reserveBidList:                    
+                for bid in group.reserveBidList:                    
                     bid.printInfo(0)          
                 print(">>here are the demand bids:")          
-                for bid in self.demandBidList:                    
+                for bid in group.demandBidList:                    
                     bid.printInfo(0)
             
             qrem = 0                #leftover part of bid
@@ -1054,15 +1066,15 @@ class UtilityAgent(Agent):
             demandindex = 0
             partialsupply = False
             partialdemand = False
-            sblen = len(self.supplyBidList)
-            rblen = len(self.reserveBidList)
-            dblen = len(self.demandBidList)
+            sblen = len(group.supplyBidList)
+            rblen = len(group.reserveBidList)
+            dblen = len(group.demandBidList)
             
             
             while supplyindex < sblen and demandindex < dblen:
                 
-                supbid = self.supplyBidList[supplyindex]
-                dembid = self.demandBidList[demandindex]
+                supbid = group.supplyBidList[supplyindex]
+                dembid = group.demandBidList[demandindex]
                 
                 print("supplybid rate: {sup}".format(sup = supbid.rate))
                 print("demandbid rate: {dem}".format(dem = dembid.rate))
@@ -1214,7 +1226,7 @@ class UtilityAgent(Agent):
                     demandindex += 1
             
             while supplyindex < sblen:
-                supbid = self.supplyBidList[supplyindex]
+                supbid = group.supplyBidList[supplyindex]
                 if settings.DEBUGGING_LEVEL >= 2:
                     print(" out of loop, still cleaning up supply bids {si}".format(si = supplyindex))
                 if partialsupply:
@@ -1233,16 +1245,16 @@ class UtilityAgent(Agent):
                                 print("UTILITY {me} placing rejected power bid {bid} in reserve list".format(me = self.name, bid = supbid.uid))
                                 
                             
-                            self.supplyBidList.remove(supbid)
-                            sblen = len(self.supplyBidList)
-                            self.reserveBidList.append(supbid)
+                            group.supplyBidList.remove(supbid)
+                            sblen = len(group.supplyBidList)
+                            group.reserveBidList.append(supbid)
                             supbid.service = "reserve"
                     else:
                         supbid.accepted = False
                 supplyindex += 1
                 
             while demandindex < dblen:
-                dembid = self.demandBidList[demandindex]
+                dembid = group.demandBidList[demandindex]
                 if settings.DEBUGGING_LEVEL >= 2:
                     print(" out of loop, still cleaning up demand bids {di}".format(di = demandindex))
                 if partialdemand:
@@ -1261,8 +1273,10 @@ class UtilityAgent(Agent):
             
             totalsupply = 0
             #notify the counterparties of the terms on which they will supply power
-            for bid in self.supplyBidList:
+            for bid in group.supplyBidList:
+                #print("total supply contains:")
                 if bid.accepted:
+                    print(bid.resourceName)
                     totalsupply += bid.amount
                     bid.rate = group.rate
                     self.sendBidAcceptance(bid, group.rate)
@@ -1297,24 +1311,25 @@ class UtilityAgent(Agent):
                     self.dbupdatebid(bid,self.dbconn,self.t0)
                     
             totaldemand = 0        
-            for bid in self.demandBidList:
+            for bid in group.demandBidList:
                 #look up customer object corresponding to bid
                 cust = listparse.lookUpByName(bid.counterparty,self.customers)
                 if bid.accepted:
                     totaldemand += bid.amount
                     
-            
-            self.reserveBidList.sort(key = operator.attrgetter("rate"))
+            print("start battery supply")
+            group.reserveBidList.sort(key = operator.attrgetter("rate"))
             totalreserve = 0
             leftbidlist = []         
-            for bid in self.reserveBidList:
+           
+            for bid in group.reserveBidList:
                 bid.printInfo(0)
                 print("maxLoad ({ml})- totalsupply({ts}): {tr}".format( ml = maxLoad,ts = totalsupply, tr = maxLoad-totalsupply))
                 if totalreserve < (maxLoad - totalsupply) and (maxLoad - totalsupply) > 0.001 and bid.amount > 0.022:
                     totalreserve += (bid.amount - 0.02)
                     print("totalreserve = {tr}".format(tr = totalreserve))
                     
-                    for leftbid in self.demandBidList:
+                    for leftbid in group.demandBidList:
                         #amount = 0
                         print("leftbid in demandBidlist")
                         leftbid.printInfo(0)
@@ -1350,7 +1365,7 @@ class UtilityAgent(Agent):
                         print("bid rate(reserve):{rate1}".format(rate1 = bid.rate))
                         print("leftbid rate(demand):{rate2}".format(rate2 = leftbid.rate))                  
                         if bid.rate < leftbid.rate:
-#                            group.rate = leftbid.rate
+                            group.rate = leftbid.rate
                             print("reserve bid rate < leftbid rate")                            
                             if qrem > leftbid.amount:
                                 qrem -= leftbid.amount
@@ -1375,9 +1390,10 @@ class UtilityAgent(Agent):
                     bid.amount = bid.amount - qrem - 0.02
                     if bid.amount > 0.01:
                         bid.accepted = True  
-                        bid.rate = group.rate             
+                        bid.rate = group.rate 
+                                
                         print("reserve bid accepted")
-                        print("bid amount = {ba}".format(ba = bid.amount))                                        
+                        print("bid amount = {ba}, bid rate = {rate}".format(ba = bid.amount, rate = bid.rate))                                        
                     else:
                         bid.accepted = False 
                                     
@@ -1385,7 +1401,7 @@ class UtilityAgent(Agent):
                     bid.accepted = False
             for leftbid in leftbidlist:
                 if leftbid.accepted == True:
-                    print("pay attention here!!!")
+            #        print("pay attention here!!!")
                     #for Res in self.Resources:
                     #    if type(Res)==resource.LeadAcidBattery:
                     #        state = Res.statebehaviorcheck(SOC,leftbid.amount)
@@ -1407,7 +1423,7 @@ class UtilityAgent(Agent):
                     cust.permission = True 
                             
                     
-            for bid in self.reserveBidList:
+            for bid in group.reserveBidList:
                 if bid.accepted:
                     self.sendBidAcceptance(bid,group.rate)
                     
@@ -1441,7 +1457,7 @@ class UtilityAgent(Agent):
             self.bidstate.reserveonly()
             
             #notify the counterparties of the terms on which they will consume power
-            for bid in self.demandBidList:
+            for bid in group.demandBidList:
                 #look up customer object corresponding to bid
                 cust = listparse.lookUpByName(bid.counterparty,self.customers)
                 if bid.accepted:
@@ -1509,7 +1525,7 @@ class UtilityAgent(Agent):
         #call enactPlan
         print("now start enact this period plan")
      #   print("-------test test-------")
-     #   self.enactPlan()
+        self.enactPlan()
      #   subs = self.getTopology()
      #   self.printInfo(2)
         
@@ -1534,6 +1550,7 @@ class UtilityAgent(Agent):
         
         #responsible for enacting the plan which has been defined for a planning period
     def enactPlan(self):
+     
         #which resources are being used during this period? keep track with this list
         involvedResources = []
         #change setpoints
@@ -2075,6 +2092,13 @@ class UtilityAgent(Agent):
         if settings.DEBUGGING_LEVEL >= 2:
             print("running fault detection subroutine")
         faultnode = None
+  #      if self.CurrentPeriod.periodNumber == 3:
+  #          print(self.CurrentPeriod.periodNumber)
+  #          print("set a fault in period 3")
+  #          tagClient.writeTags(["RES_MAIN_FAULT"],[True],"scenario")
+  #          print(tagClient.readTags(["RES_MAIN_FAULT"], "scenario"))
+  #          tagClient.writeTags(["RES_MAIN_FAULT"],[1],"scenario")
+  #          print(tagClient.readTags(["RES_MAIN_FAULT"], "scenario"))
         for node in self.nodes:
             location = node.name
             localist = location.split('.')
