@@ -984,7 +984,7 @@ class UtilityAgent(Agent):
            
             if type(res) is resource.ACresource:
                 amount = res.maxDischargePower
-                rate = res.fuelCost + 0.01*random.randint(0,9)
+                rate = res.fuelCost + 0.005*random.randint(0,9)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
                     print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
@@ -1316,7 +1316,28 @@ class UtilityAgent(Agent):
                 cust = listparse.lookUpByName(bid.counterparty,self.customers)
                 if bid.accepted:
                     totaldemand += bid.amount
+                    if reserveneed == 0:
+                        bid.rate = group.rate
+                                        
+                        self.sendBidAcceptance(bid, group.rate)
+                        print("send demand bid acceptance")
+                        #update bid's entry in database
+                        self.dbupdatebid(bid,self.dbconn,self.t0)
+                        
+                        #self.NextPeriod.plan.addConsumption(bid)
+                        self.NextPeriod.demandbidmanager.readybids.append(bid)
+                        
+                        #give customer permission to connect
+                        cust.permission = True 
+                        print("customer {cus} get permission".format(cus = cust.name))                   
                     
+                else:
+                    self.sendBidRejection(bid, group.rate)
+                    #update bid's entry in database
+                    self.dbupdatebid(bid,self.dbconn,self.t0)
+                    #customer does not have permission to connect
+                    cust.permission = False
+                     
             print("start battery supply")
             group.reserveBidList.sort(key = operator.attrgetter("rate"))
             totalreserve = 0
@@ -1456,33 +1477,7 @@ class UtilityAgent(Agent):
                     
             self.bidstate.reserveonly()
             
-            #notify the counterparties of the terms on which they will consume power
-            for bid in group.demandBidList:
-                #look up customer object corresponding to bid
-                cust = listparse.lookUpByName(bid.counterparty,self.customers)
-                if bid.accepted:
-                    totaldemand += bid.amount
-                    bid.rate = group.rate
-                                        
-                    self.sendBidAcceptance(bid, group.rate)
-                    print("send demand bid acceptance")
-                    #update bid's entry in database
-                    self.dbupdatebid(bid,self.dbconn,self.t0)
-                        
-                    #self.NextPeriod.plan.addConsumption(bid)
-                    self.NextPeriod.demandbidmanager.readybids.append(bid)
-                        
-                    #give customer permission to connect
-                    cust.permission = True 
-                    print("customer {cus} get permission".format(cus = cust.name))                   
-                    
-                else:
-                    self.sendBidRejection(bid, group.rate)
-                    #update bid's entry in database
-                    self.dbupdatebid(bid,self.dbconn,self.t0)
-                    #customer does not have permission to connect
-                    cust.permission = False
-                                   
+                                  
             #announce rates for next period
             for cust in group.customers:
                 self.announceRate(cust,group.rate,self.NextPeriod)

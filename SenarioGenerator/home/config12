@@ -1,34 +1,33 @@
-{"agentid": "home12",
+{
+	"agentid": "home12",
 	"name": "home12",
 	"location": "AC.RES.BUS4.LOAD2",
 	"message": "home agent up",
 	"FREGpart" : 0,
-	"DRpart" : 0,
+	"DRpart" : 1,
 	"refload" : 0.8,
-	"windowlength" : 6,
+	"windowlength" : 10,
 	"resources": [],
 	"appliances": 
 	[
 		{
-			
 			"type": "heater",
 			"owner":"home12",
 			"name":"heater5",
 			"specificheatcapacity":4.184,
-			"mass":3.0,
-			"thermalresistance":32.0,
-			"maxsetpoint":40.0,
-			"nominalpower":0.8,
+			"mass":4.4,
+			"thermalresistance":35.0,
+			"nominalpower":1.2,
 			"deltat":10.0,
-			"inittemp":36.0
+			"inittemp":33.0
 		}
 	],
 	"preference_manager":
 	{
 		"selection_rule":
 		{
-			"type":"fixed",
-			"params":{}
+			"type":"repeating_sets",
+            "params":{"periods":[[0,1,2,3,4,5,6,7,8,9,10],[11,12,13,14,15,16,17,18,19,20,21,22,23]]}
 		},
 		"behavior_sets":
 		[
@@ -41,8 +40,24 @@
 						"type":"quad",
 						"params":
 						{
-							"a":1270.0,
-							"b":-7.0,
+							"a":1200.0,
+							"b":-4.5,
+							"c":0.65
+						}
+					}
+				}
+			],
+			[
+				{
+					"name":"heater5",
+					"devicenames":["heater5"],
+					"costfn":
+					{
+						"type":"quad",
+						"params":
+						{
+							"a":1550.0,
+							"b":-18.0,
 							"c":0.85
 						}
 					}
@@ -51,3 +66,8 @@
 		]
 	}
 }
+
+
+
+
+

@@ -90,14 +90,18 @@ class CustomerProfile(object):
         print("currentTag in customer profile:")
         print(self.currentTag)
         currentvals = tagClient.readTags([self.currentTag],"load")
+        print(currentvals)
+        
         print("voltageTag in customer profile:")
         print(self.voltageTag)
-        
         voltagevals = tagClient.readTags([self.voltageTag],"load")
+        print(voltagevals)
+        
         print("measure power")
         power = currentvals * voltagevals
         print("measure finished")
  #       self.tagCache[self.powerTag] = (power, datetime.now())
+        print("power is : {pow}".format(pow = power))
         return power
             
     def measurePF(self):

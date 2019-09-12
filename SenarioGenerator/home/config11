@@ -4,7 +4,7 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.1,
+	"refload" : 0.3,
 	"windowlength" : 3,
 	"resources": [],
 	"appliances": 
@@ -13,7 +13,7 @@
 			"type": "light", 
 			"owner": "home11",
 			"name":"light11",
-			"nominalpower":0.1
+			"nominalpower":0.3
 		}
 	],
 	"preference_manager":
@@ -34,7 +34,7 @@
 						"type":"piecewise",
 						"params":
 						{
-							"values":[3.6,-3.6],
+							"values":[1.6,-1.6],
 							"bounds":[0.5]
 						}
 					}

@@ -5,7 +5,7 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.1,
+	"refload" : 0.3,
 	"windowlength" : 2,
 	"resources": [],
 	"appliances": 
@@ -14,7 +14,7 @@
 			"type": "light", 
 			"owner": "home5",
 			"name":"light2",
-			"nominalpower":0.1
+			"nominalpower":0.3
 		}
 	],
 	"preference_manager":
