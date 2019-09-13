@@ -560,7 +560,7 @@ class HomeAgent(Agent):
     def prepareBidFromPlan(self,plan):
         period = plan.period
         comps = plan.optimalcontrol.components
-        rate = plan.offerprice + 0.5
+        rate = plan.offerprice + 1
             
         
         for res in self.Resources:

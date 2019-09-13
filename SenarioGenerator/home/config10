@@ -5,7 +5,7 @@
 	"FREGpart" : 0,
 	"DRpart" : 0,
 	"refload" : 0.4,
-	"windowlength" : 4,
+	"windowlength" : 14,
 	"resources": [],
 	"appliances": 
 	[
@@ -42,7 +42,7 @@
 						"params":
 						{
 							"a":1350.0,
-							"b":-6.0,
+							"b":-8.0,
 							"c":0.74
 						}
 					}

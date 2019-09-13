@@ -984,7 +984,7 @@ class UtilityAgent(Agent):
            
             if type(res) is resource.ACresource:
                 amount = res.maxDischargePower
-                rate = res.fuelCost + 0.005*random.randint(0,9)
+                rate = res.fuelCost + 0.01*random.randint(0,2)
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
                     print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
@@ -998,7 +998,7 @@ class UtilityAgent(Agent):
                 amount = res.SOC
                 print("battery totally have {am} power".format(am = amount))
 #                rate = max(control.ratecalc(res.capCost,.05,res.amortizationPeriod,.05),res.capCost/res.cyclelife) + 0.005*amount + 0.01*random.randint(0,9)
-                rate = 0.01*random.randint(0,9)
+                rate = 0.02*random.randint(0,5) + 0.3
                 newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"reserve", "amount": amount, "rate":rate, "counterparty": self.name, "period_number": self.NextPeriod.periodNumber})
                 if newbid:
                     print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
@@ -1316,7 +1316,7 @@ class UtilityAgent(Agent):
                 cust = listparse.lookUpByName(bid.counterparty,self.customers)
                 if bid.accepted:
                     totaldemand += bid.amount
-                    if reserveneed == 0:
+                    if 1:#reserveneed == 0:
                         bid.rate = group.rate
                                         
                         self.sendBidAcceptance(bid, group.rate)
@@ -1342,7 +1342,8 @@ class UtilityAgent(Agent):
             group.reserveBidList.sort(key = operator.attrgetter("rate"))
             totalreserve = 0
             leftbidlist = []         
-           
+#            demandbidlist = group.demandBidList
+#            demandbidlist.sort(key = operator.attrgetter("rate"))
             for bid in group.reserveBidList:
                 bid.printInfo(0)
                 print("maxLoad ({ml})- totalsupply({ts}): {tr}".format( ml = maxLoad,ts = totalsupply, tr = maxLoad-totalsupply))
@@ -2140,7 +2141,7 @@ class UtilityAgent(Agent):
         #update topology
         if faultnode:
             subs = self.updateTopology(faultnode)
-            self.printInfo(2)
+        #    self.printInfo(2)
             self.announceTopology()
                 
         #then reconnect the distributed resources

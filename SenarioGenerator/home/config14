@@ -35,7 +35,7 @@
 						"type":"piecewise",
 						"params":
 						{
-							"values":[2.7, -2.7],
+							"values":[2, -2],
 							"bounds":[0.5]
 						}
 					}

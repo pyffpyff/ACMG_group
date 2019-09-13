@@ -1,6 +1,6 @@
 {"agentid": "home11",
 	"name": "home11",
-	"location": "AC.RES.BUS3.LOAD5",
+	"location": "AC.IND.BUS1.LOAD2",
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,

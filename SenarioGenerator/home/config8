@@ -1,6 +1,6 @@
 {"agentid": "home8",
 	"name": "home8",
-	"location": "AC.RES.BUS1.LOAD5",
+	"location": "AC.IND.BUS1.LOAD5",
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
@@ -10,56 +10,42 @@
 	"appliances": 
 	[
 		{
-            "type": "refrigerator",
-            "owner":"home8",
-            "name":"refrigerator1",
-            "volume":0.08,
-            "thermalresistance":48.0,
-            "nominalpower":0.6,
-            "deltat":10.0,
-            "relativeefficiency":0.5,
-            "inittemp":3.0
-        }
-    ],
-    "preference_manager":
-    {
-        "selection_rule":
-        {
-            "type":"repeating_sets",
-            "params":{"periods":[[0,1,2,3,4,5,6,7,8,9,10],[11,12,13,14,15,16,17,18,19,20,21,22,23]]}
-        },
-        "behavior_sets":
-        [
+		"type":"refrigerator",
+		"owner":"home8",
+		"name":"refrigerator1",
+		"volume":0.05,
+		"thermalresistance":40.0,
+		"minsetpoint":0.0,
+		"nominalpower":0.6,
+		"deltat":10.0,
+		"relativeefficiency":0.5,
+		"inittemp":3.0
+		}
+	],
+	"preference_manager":
+	{
+		"selection_rule":
+		{
+			"type":"fixed",
+			"params":{}
+		},
+		"behavior_sets":
 		[
-	            {
-	                "name":"refrigerator1",
-	                "devicenames":["refrigerator1"],
-	                "costfn":
-	                {
-	                    "type":"piecewise",
-	                    "params":
-	                    {
-	                        "values":[10.0,-2.3,-5.5,-1.4,10.0],
-	                        "bounds":[0.0,0.2,0.4,0.6]
-	                    }
-	                }
-	            }
-			],
 			[
-	            {
-	                "name":"refrigerator1",
-	                "devicenames":["refrigerator1"],
-	                "costfn":
-	                {
-	                    "type":"piecewise",
-	                    "params":
-	                    {
-	                        "values":[10.0,-1.4,-3.5,-1.4,10.0],
-	                        "bounds":[0.0,0.2,0.4,0.6]
-	                    }
-	                }
-	            }
+				{
+					"name":"refrigerator1",
+					"devicenames":["refrigerator1"],
+					"costfn":
+					{
+						"type":"piecewise",
+						"params":
+						{
+							"values":[10.0,-0.75,-3.0,-0.75,10.0],
+							"bounds":[0.0,0.2,0.4,0.6]
+						}
+					}
+				}
+			]
 		]
-        ]
-    }
+	}
 }
