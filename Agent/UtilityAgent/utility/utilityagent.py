@@ -1698,12 +1698,13 @@ class UtilityAgent(Agent):
             if type(elem) is resource.ACresource:
                 ACmax = elem.maxDischargePower
         
+        leftamount = 0
         for bid in self.supplyBidList:
             if bid.resourceName == "ACresource":
                 chargerate = bid.rate
                 print("charge rate is : {cr}".format(cr = chargerate))
                 if bid.accepted == True:
-                    leftamount = ACmax - bid.amount
+                    leftamount = ACmax  - (bid.amount-1.5)
                 else:
                     leftamount = ACmax
                 print("AC max is: {acmax}, bid amount is: {bidamount}, left amount is: {leftamount}".format(acmax = ACmax, bidamount=bid.amount,leftamount=leftamount))
@@ -1715,8 +1716,8 @@ class UtilityAgent(Agent):
                 chargeamount = 0
                 if elem.SOC < .6:
                     for bid in self.reserveBidList:
-                        if bid.accepted == False:
-                        
+                    #    if bid.accepted == False:
+                        if leftamount > 0.1:   
                             if (leftamount+elem.SOC) > 0.98:
                                 #print("bid amount: {bidamount}".format(bidamount=bid.amount))
                                 chargeamount = 0.98 - elem.SOC
@@ -2665,15 +2666,22 @@ class UtilityAgent(Agent):
         IndCurrent = tagClient.readTags(["IND_MAIN_CURRENT"],"load")
         IndVoltage = tagClient.readTags(["IND_MAIN_VOLTAGE"],"load")
         IndPower = IndCurrent * IndVoltage
+        print("IndPower is : {ind}".format(ind=IndPower))
         #c is the capacity reactance of each capacitance
-        c = 1 / (60 *2 * math.pi * 0.000018)
+        c = 1 / (60 *2 * math.pi * 0.000018)/300/6
         powerfactor = tagClient.readTags([self.powerfactorTag],"grid")
+        print("power factor now is: {pf}".format(pf = powerfactor))
+
         if powerfactor < 0.9:
-            Q = IndPower * powerfactor
-            Qgoal = IndPower * 0.9
-            Qneed = Qgoal - Q
-        Cap = 24*24/Qneed
-        CapNumber = float(int(round(Cap / c)))
+            sita = math.acos(powerfactor)
+            sins = math.sin(sita)
+            Q = IndPower / powerfactor * sins
+            Qgoal = IndPower * math.tan(math.acos(0.9))
+            Qneed = Q - Qgoal
+            print("sita :{sita}, Q:{q}, Qgoal:{qgoal}, Qneed: {qneed}".format(sita = sita, q = Q, qgoal = Qgoal, qneed = Qneed))
+    #    Cap = 24*24/Qneed
+        print("c for each capacitor: {c}".format(c = c))
+        CapNumber = float(int(round(Qneed / c)))
         return CapNumber
     
             

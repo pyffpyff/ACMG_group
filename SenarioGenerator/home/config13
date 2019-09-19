@@ -4,7 +4,7 @@
 	"message": "home agent up",
 	"FREGpart" : 0,
 	"DRpart" : 0,
-	"refload" : 0.1,
+	"refload" : 0.5,
 	"windowlength" : 3,
 	"resources": [],
 	"appliances": 
