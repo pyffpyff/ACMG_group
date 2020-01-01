@@ -1,27 +1,26 @@
 {
 	"agentid": "home15",
 	"name": "home15",
-	"location": "AC.COM.BUS2.LOAD2",
+	"location": "AC.IND.BUS2.LOAD4",
 	"message": "home agent up",
 	"FREGpart" : 0,
-	"DRpart" : 0,
-	"refload" : 0.6,
-	"windowlength" : 5,
+	"DRpart" : 1,
+	"refload" : 0.8,
+	"windowlength" : 7,
 	"resources": [],
 	"appliances": 
 	[
 		{
-			
 			"type": "heater",
 			"owner":"home15",
 			"name":"heater6",
 			"specificheatcapacity":4.184,
-			"mass":2.8,
+			"mass":2.0,
 			"thermalresistance":26.0,
-			"maxsetpoint":40.0,
-			"nominalpower":0.6,
+			"maxsetpoint":42.0,
+			"nominalpower":0.8,
 			"deltat":10.0,
-			"inittemp":37.0
+			"inittemp":39.0
 		}
 	],
 	"preference_manager":
@@ -39,15 +38,16 @@
 					"devicenames":["heater6"],
 					"costfn":
 					{
-						"type":"piecewise",
+						"type":"quad",
 						"params":
 						{
-							"values":[2.3,-1],
-							"bounds":[0.4]
+							"a":1250.0,
+							"b":-8.0,
+							"c":0.74
 						}
 					}
+				}
 			]
 		]
 	}
-	
 }

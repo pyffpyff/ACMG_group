@@ -1,26 +1,26 @@
-{"agentid": "home10",
-	"name": "home10",
-	"location": "AC.RES.BUS3.LOAD1",
+{
+	"agentid": "home18",
+	"name": "home18",
+	"location": "AC.IND.BUS2.LOAD4",
 	"message": "home agent up",
 	"FREGpart" : 0,
-	"DRpart" : 0,
-	"refload" : 0.6,
-	"windowlength" : 14,
+	"DRpart" : 1,
+	"refload" : 0.8,
+	"windowlength" : 7,
 	"resources": [],
 	"appliances": 
 	[
 		{
-			
 			"type": "heater",
-			"owner":"home10",
-			"name":"heater4",
+			"owner":"home18",
+			"name":"heater8",
 			"specificheatcapacity":4.184,
-			"mass":2.5,
+			"mass":2.0,
 			"thermalresistance":30.0,
-			"maxsetpoint":40.0,
-			"nominalpower":0.6,
+			"maxsetpoint":36.0,
+			"nominalpower":0.8,
 			"deltat":10.0,
-			"inittemp":36.5
+			"inittemp":38.0
 		}
 	],
 	"preference_manager":
@@ -34,14 +34,14 @@
 		[
 			[
 				{
-					"name":"heater4",
-					"devicenames":["heater4"],
+					"name":"heater8",
+					"devicenames":["heater8"],
 					"costfn":
 					{
 						"type":"quad",
 						"params":
 						{
-							"a":1350.0,
+							"a":1250.0,
 							"b":-8.0,
 							"c":0.74
 						}
