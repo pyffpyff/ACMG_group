@@ -667,6 +667,8 @@ class UtilityAgent(Agent):
                                         newres = customer.LeadAcidBatteryProfile(**resource)
                                     elif resType == "ACresource":
                                         newres = customer.GeneratorProfile(**resource)
+                                    elif resType == "Solar":
+                                        newres = customer.GeneratorProfile(**resource)
                                     else:
                                         print("unsupported resource type")
                                     node.addResource(newres)
@@ -1003,6 +1005,17 @@ class UtilityAgent(Agent):
                 if newbid:
                     print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
                     self.reserveBidList.append(newbid)
+                    
+                    #write to database
+                    self.dbnewbid(newbid,self.dbconn,self.t0)
+            elif type(res) is resource.Solar:
+                amount = res.maxDischargePower
+                rate = res.fuelCost + 0.01*random.randint(0,2)
+                newbid = control.SupplyBid(**{"resource_name": res.name, "side":"supply", "service":"power", "amount": amount, "rate":rate, "counterparty":self.name, "period_number": self.NextPeriod.periodNumber})
+                if newbid:
+                    print("UTILITY {me} ADDING OWN BID {id} TO LIST".format(me = self.name, id = newbid.uid))
+                    self.supplyBidList.append(newbid)
+                    self.outstandingSupplyBids.append(newbid)
                     
                     #write to database
                     self.dbnewbid(newbid,self.dbconn,self.t0)
@@ -1696,7 +1709,9 @@ class UtilityAgent(Agent):
                         
         for elem in self.Resources:
             if type(elem) is resource.ACresource:
+                print("this is resource {resource}".format(resource = type(elem)))
                 ACmax = elem.maxDischargePower
+                print("AC max power is:{ac}".format(ac = ACmax))
         
         leftamount = 0
         for bid in self.supplyBidList:
@@ -1704,7 +1719,7 @@ class UtilityAgent(Agent):
                 chargerate = bid.rate
                 print("charge rate is : {cr}".format(cr = chargerate))
                 if bid.accepted == True:
-                    leftamount = ACmax  - (bid.amount-1.5)
+                    leftamount = ACmax  - bid.amount
                 else:
                     leftamount = ACmax
                 print("AC max is: {acmax}, bid amount is: {bidamount}, left amount is: {leftamount}".format(acmax = ACmax, bidamount=bid.amount,leftamount=leftamount))

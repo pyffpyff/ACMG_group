@@ -426,7 +426,25 @@ class ACresource(Source):
         print("inputCostFn")
         return cost
     
+class Solar(Source):
+    def __init__(self,**res):
+        super(Solar,self).__init__(**res)
+        self.fuelCost = res["fuel_cost"]
+        self.amortizationPeriod = res["amortization_period"]
+        self.maxDischargePower = res["maxDischargePower"]
+        self.actionpoints = [0, .1, .25, .5, 1]
+        self.gridpoints = [1]
+        
+    def getState(self):
+        return 1
     
+#     def costFn(self,period,devstate):
+#         return 0
+    
+    def inputCostFn(self,input,period,state,duration):
+        cost = control.ratecalc(self.capCost,.05,self.amortizationPeriod,.2) + self.getPowerFromPU(input)*duration*self.fuelCost + 0.01*randint(0,9)
+        print("inputCostFn")
+        return cost    
 
 
 class Channel():
@@ -695,6 +713,8 @@ def makeResource(strlist,classlist,debug = False):
                 res = LeadAcidBattery(**item)
             elif resType == "ACresource":
                 res = ACresource(**item)
+            elif resType == "Solar":
+                res = Solar(**item)
             else:
                 pass
             classlist.append(res)
