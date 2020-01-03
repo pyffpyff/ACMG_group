@@ -1713,27 +1713,78 @@ class UtilityAgent(Agent):
                 ACmax = elem.maxDischargePower
                 print("AC max power is:{ac}".format(ac = ACmax))
         
-        leftamount = 0
+        for elem in self.Resources:
+            if type(elem) is resource.Solar:
+                print("this is resource {resource}".format(resource = type(elem)))
+                Solarmax = elem.maxDischargePower
+                print("Solar max power is:{ac}".format(ac = Solarmax))
+                
+        ACleftamount = 0
+        Solarleftamount = 0
         for bid in self.supplyBidList:
             if bid.resourceName == "ACresource":
                 chargerate = bid.rate
                 print("charge rate is : {cr}".format(cr = chargerate))
                 if bid.accepted == True:
-                    leftamount = ACmax  - bid.amount
+                    ACleftamount = ACmax  - bid.amount
                 else:
-                    leftamount = ACmax
-                print("AC max is: {acmax}, bid amount is: {bidamount}, left amount is: {leftamount}".format(acmax = ACmax, bidamount=bid.amount,leftamount=leftamount))
+                    ACleftamount = ACmax
+                print("AC max is: {acmax}, bid amount is: {bidamount}, left amount is: {ACleftamount}".format(acmax = ACmax, bidamount=bid.amount,ACleftamount=ACleftamount))
+            elif bid.resourceName == "Solar":
+                chargerates = bid.rate
+                print("charge rate is : {cr}".format(cr = chargerate))   
+                if bid.accepted == True:
+                    Solarleftamount = Solarmax  - bid.amount
+                else:
+                    Solarleftamount = Solarmax
+                print("Solar max is: {solarmax}, bid amount is: {bidamount}, left amount is: {Solarleftamount}".format(solarmax = Solarmax, bidamount=bid.amount,Solarleftamount=Solarleftamount))
+                               
                 
+                 
         for elem in self.Resources:
             if type(elem) is resource.LeadAcidBattery:
                 SOC = elem.SOC
                 print("current SOC before charging is: {soc}".format(soc=SOC))
                 chargeamount = 0
-                if elem.SOC < .6:
+                chargeamounts = 0
+                if elem.SOC < 0.98:
                     for bid in self.reserveBidList:
+                        if Solarleftamount > 0.01:   
+                            if (Solarleftamount+elem.SOC) > 0.98:
+                                #print("bid amount: {bidamount}".format(bidamount=bid.amount))
+                                chargeamounts = 0.98 - elem.SOC
+                                elem.setSOC(0.98)
+                                print("charging battery to 0.98")
+                                print("battery SOC now is: {soc}".format(soc=elem.SOC))
+                                for bid in self.reserveBidList:
+                                    
+                                    bid.amount = 0.98 - SOC
+                                    if bid.amount > 0:
+                                        bid.accepted = True
+                                        bid.rate = chargerates
+                                        self.sendBidAcceptance(bid,chargerate)
+                                        #update to database
+                                        self.dbupdatebid(bid,self.dbconn,self.t0)
+                                    print("updatebid")
+                                                                
+                            else:
+                                elem.setSOC(Solarleftamount+elem.SOC)
+                                print("charging battery {la}".format(la = Solarleftamount))
+                                print("battery SOC now is: {soc}".format(soc=elem.SOC))
+                                chargeamounts = Solarleftamount
+                                bid.amount = Solarleftamount
+                                if bid.amount > 0:
+                                    bid.accepted = True
+                                    bid.rate = chargerates
+                                    self.sendBidAcceptance(bid,chargerate)
+                                    #update to database
+                                    self.dbupdatebid(bid,self.dbconn,self.t0)
+                                print("updatebid")
+                           
+                        
                     #    if bid.accepted == False:
-                        if leftamount > 0.1:   
-                            if (leftamount+elem.SOC) > 0.98:
+                        elif ACleftamount > 0.01:   
+                            if (ACleftamount+elem.SOC) > 0.98:
                                 #print("bid amount: {bidamount}".format(bidamount=bid.amount))
                                 chargeamount = 0.98 - elem.SOC
                                 elem.setSOC(0.98)
@@ -1751,11 +1802,11 @@ class UtilityAgent(Agent):
                                     print("updatebid")
                                                                 
                             else:
-                                elem.setSOC(leftamount+elem.SOC)
-                                print("charging battery to {la}".format(la = leftamount))
+                                elem.setSOC(ACleftamount+elem.SOC)
+                                print("charging battery {la}".format(la = ACleftamount))
                                 print("battery SOC now is: {soc}".format(soc=elem.SOC))
-                                chargeamount = leftamount
-                                bid.amount = leftamount
+                                chargeamount = ACleftamount
+                                bid.amount = ACleftamount
                                 if bid.amount > 0:
                                     bid.accepted = True
                                     bid.rate = chargerate
@@ -1787,7 +1838,12 @@ class UtilityAgent(Agent):
                             self.sendBidAcceptance(bid,bid.rate)
                             #update to database
                             self.dbupdatebid(bid,self.dbconn,self.t0)
-                                
+                        if bid.resourceName == "Solar":
+                            bid.amount += chargeamounts
+                            self.sendBidAcceptance(bid,bid.rate)
+                            #update to database
+                            self.dbupdatebid(bid,self.dbconn,self.t0)
+                                 
         
             
         Cap = self.CapNumber()

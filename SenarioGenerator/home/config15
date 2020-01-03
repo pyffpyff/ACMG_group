@@ -20,7 +20,7 @@
 			"maxsetpoint":42.0,
 			"nominalpower":0.8,
 			"deltat":10.0,
-			"inittemp":39.0
+			"inittemp":35.0
 		}
 	],
 	"preference_manager":

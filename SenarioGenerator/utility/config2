@@ -2,7 +2,7 @@
 	"agentid": "utility",
 	"name": "utility1",
 	"message": "utility agent starting up",
-	"resources": [{"type":"ACresource", "owner":"utility1", "location": "AC.COM.MAIN.MAIN", "name":"ACresource", "capCost":500, "amortization_period":30, "maxDischargePower":2.8,"dischargeChannel":1,"fuel_cost":0.4}
+	"resources": [{"type":"ACresource", "owner":"utility1", "location": "AC.COM.MAIN.MAIN", "name":"ACresource", "capCost":500, "amortization_period":30, "maxDischargePower":5,"dischargeChannel":1,"fuel_cost":0.4}
 	
 ]
 
